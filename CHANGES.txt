@@ -1,0 +1,48 @@
+PRESENTATION CHANGES -- 8 OCTOBER 2026
+
+Preserved
+  All executable lines of the seven numerical functions are unchanged from
+  the sources used for the reported experiment. No arithmetic, branching,
+  solver setting, convergence rule or public-function diagnostic was refactored.
+  The captured benchmark harness and its timing boundaries remain unchanged.
+
+Documentation
+  Replaced historical source headers with function contracts: purpose, inputs,
+  dimensions, units, outputs and method-specific statuses. Added brief comments
+  connecting Direct's main steps to Algorithm 1 and the manuscript equations.
+  Corrected the basis equation reference and documented full P=N'*N construction.
+  Standardized new documentation on 'tension distribution'. Original identifiers,
+  bibliographic titles and captured output labels retain their recorded spelling.
+
+New example and wrappers
+  Added examples/run_example.m. It calls each method from fresh parameters,
+  prints requested/achieved force and cable tensions, and independently checks
+  bounds and equilibrium. The default needs only MATLAB; comparisons additionally
+  require Optimization Toolbox. No example timing is reported as paper evidence.
+  Added benchmark/run_benchmark.m to stage the captured harness with its sources
+  and use explicit output paths; the default is a 192-request smoke profile.
+  Added benchmark/reproduce_saved_results.m to analyze copies in a new directory,
+  with guards preventing accidental solver calls. These wrappers operate outside
+  the measured numerical routines and do not replace the original observations.
+  Relative paths are resolved against MATLAB's Current Folder before Java path
+  normalization. The same path-only correction was made in the saved-norm
+  postprocessor; its numerical calculations and acceptance masks are unchanged.
+
+Analysis dependency cleanup
+  The captured summary helper's source-snapshot list no longer includes its
+  obsolete plot helper. The wrapper always disables the captured plot branch.
+  This changes provenance metadata only, not a numerical statistic. The original
+  plot helper and historical figure exports are omitted. Exact source identities
+  and this one-line analysis-source change are recorded with the benchmark files.
+
+Package cleanup
+  Omitted internal rebuttal discussions, draft manuscripts, debug output, logs,
+  temporary checks, obsolete figures, duplicate code archives and large arrays.
+  Examples and wrappers locate files relative to their own folder. No original
+  developer machine path is required. Generated test outputs are not shipped.
+
+Tests
+  Small example/comparison and smoke-capture checks execute new demonstration
+  calls. Their results validate this package only; they do not alter or replace
+  the previously reported full-run data. The full grid is not rerun merely for
+  comment, documentation or packaging changes. See docs/VALIDATION.txt.

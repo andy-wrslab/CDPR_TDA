@@ -1,0 +1,188 @@
+FUNCTION REFERENCE
+
+Shared calling convention
+
+Six tension distribution functions use OUT = name(WDM,P,F). WEC uses
+[F_NEW,IS_SCALED] = WEC_v5(WDM,P,F). All custom helpers are local functions
+inside the seven source files. Bounded QP requires Optimization Toolbox;
+the other six numerical functions use base MATLAB.
+
+The reviewed geometry has two translational force coordinates and four cables.
+WDM.param.M is 2-by-4, with columns in fixed counterclockwise (CCW) order:
+  [-315  315  315 -315; -315 -315 315 315] mm.
+P is a known 2-by-1 position in mm, and F is a 2-by-1 requested force in N.
+Each column of W points from P to its anchor and has unit length. Equilibrium
+uses W*T=F; F is the requested cable-resultant force, not its negative.
+The numerical comparison uses positions strictly inside the rectangular frame;
+frame-edge/zero-length-cable cases are separate stress cases, not the Direct
+method's ordinary geometric domain. No forward-kinematics routine is called.
+
+Supply fresh WDM.param.lim_inf=3.8*ones(4,1) and lim_sup=25*ones(4,1), in N,
+WDM.param.TOLL=1e-14, WDM.param.TOLL_WEC=1e-9, and WDM.verbose=false.
+The common contract uses equal positive lower bounds and equal upper bounds.
+Direct, ICFM branching and WEC read the first bound as a common scalar;
+do not use their legacy interfaces to infer support for unequal bounds.
+X-ACTA additionally validates general n-by-m full-row-rank geometry and scalar
+or per-cable bounds, but that broader interface was not the planar comparison.
+TOLL is a legacy numerical zero/geometric cutoff, not the common physical
+acceptance tolerance. M and P must use the same length unit. Changing force or
+tension units requires reconsidering dimensional options such as delta and
+TOLL_WEC; do not relabel the numbers alone.
+
+Build each method call from the parameter struct, not from a previous method's
+output. Returned structs preserve incoming fields. In particular, VTDA can
+return without overwriting T, so an old T could otherwise look like a new result.
+Use one output variable per call. No method uses a previous-solution warm start.
+Only QP's constant options object and X-ACTA's validated constant/options record
+persist between calls; neither retains pose, force, tension or factorization.
+
+Common outputs and physical checks
+
+A produced tension vector T is 4-by-1 in the original anchor-column order, in N.
+normT is its Euclidean norm; errT is norm(W*T-F,2), both in N. These diagnostic
+fields are produced by the numerical function and are part of its public-call
+work. They are not universal success certificates. Legacy routines may error,
+produce nonfinite values, or return without new output fields on difficult input.
+Check T exists, is numeric/real/finite with four elements, then independently test
+  max([0;lim_inf-T;T-lim_sup]) <= 1e-9 N,
+  norm(W*T-F_target,2) <= 1e-8 N.
+Require positive exitflag for bounded QP, ACTA and X-ACTA. For complete paths also
+report norm(W*T-F_raw,2), since a WEC-adjusted target or EAC slack can differ from
+the original request. A successful bounded output and exact raw-force reproduction
+are distinct results. scale_dir is a legacy, method-specific field; it has no
+single cross-method meaning. Fallback use is not itself an optimality certificate.
+
+Direct: wt4_2024_minmax_v4
+
+Minimizes actual-tension L2 through the manuscript's analytic particular solution,
+null basis, configuration selection and at most two clipped scalar minima.
+The basis/particular vector are scattered into original cable rows, so final T
+needs no inverse permutation. The method assumes the fixed CCW geometry and a
+feasible target in its stated domain. It does not call WEC internally.
+case is 0 for numerical r=0, 1..4 for configurations I..IV, and -1 for the
+initial double-saturation branch. scale_dir=1 marks double saturation or an empty
+candidate interval. Such branches retain a candidate; they do not invoke a
+fallback optimizer. scale_dir=0 still requires independent physical checks.
+With verbose=true, theta_q, theta_alphamin and N1dotN2 are additional diagnostics;
+the two scalar angles are in radians and N1dotN2 is dimensionless. Their
+calculation includes a 2-by-2 solve and two extra atan2 evaluations. Keep
+verbose=false. Case numbers, status flags and iteration counts are dimensionless.
+There are no iterative stopping options. Interval consistency uses 1e-12.
+
+ICFM: wt_pott_v2
+
+Projects the tension midpoint using pinv, then clamps/removes violating cables
+in at most three nested steps. Lower-bound tests precede upper-bound tests.
+No iterative tolerance or iteration budget is exposed; MATLAB's pinv default
+rank tolerance is used. scale_dir=1 detects a final bound violation, not failure
+to reproduce F. Additional outputs: active=(T>lim_inf), cable_n counts relative
+lower-bound differences above 1e-6, case=NaN, and param.M_eff copies M.
+This implemented procedure is not a general L2-optimality certificate.
+
+Bounded QP: wt_qp_bounded_v11
+
+Solves min 0.5*T'*T with equality W*T=F and both tension bounds. It always keeps
+both bounds, including on infeasible targets. quadprog uses interior-point-convex,
+ConstraintTolerance=1e-10, OptimalityTolerance=1e-10, MaxIterations=200, Display=off,
+and x0=[]. Other options are the installed-version defaults. The reviewed version
+was MATLAB R2024b Update 4, Optimization Toolbox 24.2. Different library versions
+can alter iteration counts and numerical results.
+Native exitflag and iter are returned; T may be empty or a last iterate on failure.
+objective is 0.5*T'*T [N^2]. resid is native firstorderopt when available, otherwise
+NaN. primal_resid is the force infinity norm [N]; bound_violation is in N.
+scale_dir=0 requires positive exitflag plus bound<=1e-9 N and force<=1e-8 N;
+otherwise -1. case=NaN. Errors from quadprog are not hidden by this routine.
+
+VTDA-L2: wt_gouttefarde_v2
+
+Computes null(W), an explicit two-dimensional generalized inverse and polygon
+vertex/edge tests. The walk processes at most 100 visits and returns before
+processing visit 101. There is no rank regularization. Geometric/closure and
+final bound tests use TOLL. vertices holds 2-by-k numerical null-coordinate
+vertices when that stage completes; param.M_eff copies M.
+The routine may return without T or propagate an error. It does not clear an
+incoming T. Always pass fresh parameters and inspect the output. fallback=1 means
+minimum-norm feasible traced-vertex fallback, not certified optimum. scale_dir=1
+means a detected final bound violation. Zero fallback/scale flags do not establish
+convergence or a valid newly computed tension vector.
+
+ACTA: wt_acta
+
+Minimizes the unit strict log barrier phi(T)=-sum(log(T-lo)+log(hi-T)) with W*T=F.
+Starts at T=(lo+hi)/2 and lambda=0 on every call. Optional WDM.acta fields are
+  tol=1e-10, maxit=50, alpha=.01, beta=.5, maxls=60.
+Stopping uses the absolute combined KKT Euclidean norm
+  norm([grad(phi)+W'*lambda; W*T-F],2) <= tol.
+This mixed KKT residual is not a force-only residual and is not X-ACTA's scaled
+criterion. maxit counts accepted Newton updates. The line search shares a maximum
+of 60 step reductions between strict-domain and residual-decrease checks. A
+2-by-2 Schur determinant guard uses 1e-12*S(1,1)*S(2,2).
+T is the last iterate. iter counts accepted updates; resid is the stopping norm.
+exitflag: 1 converged; 0 iteration budget; -1 singular-system safeguard;
+-3 line-search safeguard. A budget failure does not establish infeasibility.
+scale_dir is 0 on converged/in-bounds output, -1 on nonconvergence, 1 for bounds.
+case=NaN. This objective requires strictly feasible tensions; boundary feasibility
+alone does not supply an analytic centre.
+
+X-ACTA: wt_xacta
+
+RAC minimizes a relaxed log barrier with W*T=F, using an affine midpoint projection
+and null-coordinate Newton iteration. With k2=1 the out-of-domain barrier extension
+is quadratic. Let shrunk=clip(T_RAC,lo+delta,hi-delta), distance=abs(T_RAC-shrunk).
+Activation is mu=tanh(sum(distance.^(k3+1))). If no distance is positive, RAC is final.
+Otherwise EAC minimizes the true log barrier plus eta*norm(s)^2+gamma*norm(mu*s)^2,
+with W*T+mu*s=F and strict bounds. EAC starts from the same call's RAC result when
+interior, otherwise the shrunken projection. Final T is never clipped.
+An unsuccessful RAC stage prevents EAC. Both stages use unit barrier weights.
+
+Optional WDM.xacta fields/defaults:
+  delta=.1 N, gamma=500, eta=1e-5, k2=k3=1,
+  tol=1e-9, force_tol=1e-8 N, maxit=100,
+  alpha=.01, beta=.5, maxls=60.
+Optional rac_maxit and eac_maxit override maxit separately. maxls=60 permits 61
+trial indices, 0:60. EAC uses a .99 fraction-to-boundary safeguard. Inputs/options
+are validated; k2/k3 and budgets are positive integers, and delta is below half
+the smallest tension range. Unknown options raise errors.
+
+For g=grad(phi), diagonal Hessian h, d=max(1,norm(g,Inf),norm(W'*lambda,Inf)),
+  rho = norm(h.*eps(abs(T)),Inf)/d,
+  stationarity_tolerance = max(tol,min(sqrt(eps),4*rho)).
+Success requires all three tests:
+  norm(g+W'*lambda,Inf)/d <= stationarity_tolerance,
+  norm(rp,Inf)/max(1,norm(F,Inf)) <= tol,
+  norm(rp,Inf) <= force_tol.
+RAC uses rp=W*T-F. EAC uses rp=W*T-F-c*lambda, where
+  a=eta+gamma*mu^2, c=mu^2/(2*a), s=-mu*lambda/(2*a).
+Thus EAC primal_resid is augmented equilibrium, not raw-force equality.
+The Schur formulation avoids division by mu near zero. This implementation's
+relative stationarity allowance does not loosen the independent force tests.
+
+Output fields beyond the common T/normT/errT:
+  achieved_force: n-by-1 W*T; T_rac: m-by-1 RAC result;
+  rac_lambda, lambda, s: n-by-1 vectors; mu: scalar activation;
+  stage: 1 RAC or 2 EAC; iter: total accepted updates;
+  rac_iters/eac_iters and rac_iter/eac_iter: per-stage aliases;
+  exitflag, rac_exitflag, eac_exitflag: final/per-stage status;
+  resid: max(relative stationarity,relative augmented equality);
+  raw_resid: unscaled combined KKT Euclidean norm;
+  primal_resid: norm(rp,Inf); stationarity_resid: norm(g+W'*lambda,Inf);
+  stationarity_relative, stationarity_tolerance, roundoff_floor;
+  rac_resid/eac_resid: per-stage scaled residuals;
+  barrier_evals, rac_barrier_evals/eac_barrier_evals: full lower/upper barrier calls;
+  backtracks, rac_backtracks/eac_backtracks: rejected trials, including final failures.
+Flags: 1 convergence, 0 budget, -1 rank/factorization, -2 nonfinite state,
+-3 line-search failure. Unrun EAC residuals/flag are NaN; its work counts are zero.
+scale_dir is 0 for final flag 1, otherwise -1; case=NaN. Native convergence can
+coexist with nonzero original-force error because EAC deliberately allows slack.
+
+WEC: WEC_v5
+
+Builds the convex hull of 16 box-vertex forces on every call. For nonzero F,
+adjustment is along the signed force line, with TOLL_WEC inward margin. This can
+increase magnitude or reverse direction, not just shorten a positive ray.
+A nonintersecting line returns a NaN force and warning. An infeasible zero command
+uses a nonzero fallback; finite outputs still need attainable-force verification.
+IS_SCALED is false only for the unchanged nonzero branch; unchanged zero retains
+true. Use norm(F_NEW-F,2) for actual change (1e-12 N in the saved comparison).
+No tensions are returned. The geometry/hull can error on degeneracy. verbose=true
+opens a diagnostic plot and pauses execution, so keep it false in numerical use.

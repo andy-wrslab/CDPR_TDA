@@ -1,0 +1,20 @@
+ANALYSIS SOURCE METADATA CHANGE
+
+The measured harness and all numeric analysis expressions are preserved.
+The public saved-data wrapper always calls the summary with make_plots=false.
+Only the unused plot filename was removed from the summary provenance list,
+allowing the obsolete plotting helper to be omitted from this package.
+
+Original captured summarize_Review_v11.m SHA-256:
+002e3692edee15a63cba6acf0ad82c3976fd562209042c20fb757c3fc4ff5355
+Package summarize_Review_v11.m SHA-256:
+fde2dd11bb0729fd787c392ceb96a18684871ef98ed237337bf4aa06ce09387d
+
+Exact logical one-line diff (line endings may be normalized by the editor):
+--- original/summarize_Review_v11.m
++++ package/captured/summarize_Review_v11.m
+@@ -276,3 +276,3 @@
+ function records=analysis_sources(folder)
+-here=fileparts(mfilename('fullpath'));names={'summarize_Review_v11.m','plot_Review_v11.m'};
++here=fileparts(mfilename('fullpath'));names={'summarize_Review_v11.m'};
+ destination=fullfile(folder,'analysis_source_snapshot');if ~exist(destination,'dir'),mkdir(destination);end

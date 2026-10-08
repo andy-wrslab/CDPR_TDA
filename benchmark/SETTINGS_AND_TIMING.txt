@@ -1,0 +1,121 @@
+MEASURED V11 SETTINGS AND TIMING BOUNDARIES
+
+Captured source authority
+
+captured/Compare_Review_v11.m is byte-identical to the completed full run:
+SHA-256 05d5133cc5e8f38b0f97a12806d8784335f09597922ead03961edc44f8fb9dc7.
+The numerical package src/ files preserve measured executable statements;
+their public comments explain interfaces and limitations. Every new capture
+snapshots the exact staged sources and records their hashes in its manifest.
+
+Common geometry and force grid
+
+Anchors, in cable order (mm): (-315,-315), (315,-315), (315,315), (-315,315).
+Tension bounds: 3.8 <= T_i <= 25 N. The columns of W are platform-to-anchor
+unit directions; length <=1e-14 uses the retained zero-column convention.
+TOLL=1e-14; WEC inward margin TOLL_WEC=1e-9 N; verbose=false.
+Full pose coordinates: linspace(0,315,64) on each axis. Magnitudes:
+linspace(0,10,21). Angles: 360 directions from 0 to 2*pi, endpoint excluded.
+Pose varies fastest in raw file rows. Seed=20261006; requested chunk size
+100,000. Chunks and input rows are deterministically shuffled and the order
+of the seven method/pipeline batches rotates between chunks.
+
+One observation per attempted public call
+
+WEC alone: fresh WEC_v5 public call, including its 16 box-image vertices,
+convex hull and line/zero-force policy. This is a separate measured series.
+
+DM, ICFM, bounded QP, VTDA-L2 and ACTA post-WEC: each receives the identical
+shared WEC target. Each timer brackets its full public function call,
+including geometry, initialization, solution and native diagnostics. It
+excludes the already measured shared WEC and independent physical assessment.
+Nonfinite or independently outside shared targets skip all five calls;
+skips have output code -4 and NaN timing, never fabricated zero timings.
+
+X-ACTA raw: its full public call with the original requested force.
+
+WEC+DM raw: a single directly measured interval includes fresh WEC, its
+finite/type/shape dispatch checks and Direct when the WEC output is finite.
+This complete path attempts Direct for finite WEC outputs, even if later
+independent physical assessment rejects that target. Invalid WEC output is
+recorded as -5; exceptions remain -1. No substitute force is inserted.
+
+Input/grid preparation, shared-target physical checks, independent output
+assessment, storage and progress reporting are outside individual call
+timers. Wrapper exceptions retain the elapsed attempted call. No repeated
+measurement is substituted for a stall or failure. T_postwec_components is
+the sum of separately measured components and is explicitly not a directly
+timed complete path. No previous-call tension/factorization warm start is
+supplied. Constant QP options and X-ACTA validated configuration caches are
+part of the measured implementation and are warmed before capture.
+
+Acceptance, native status and cohorts
+
+Bound violation <=1e-9 N; force error ||W*T-F_target||_2 <=1e-8 N.
+Raw and target force errors are separate. Acceptance bit 1: finite; bit 2:
+bounded; bit 3: positive native convergence for QP/ACTA/X-ACTA, otherwise
+finite; bit 4: finite+bounded+converged; bit 5: bit4+exact target; bit 6:
+bit4+exact raw. Thus bounded successful EAC approximation need not be exact raw.
+Output codes: 1 finite, -1 exception, -2 malformed, -3 nonfinite,
+-4 shared-WEC skip, -5 invalid WEC in complete pipeline, 0 pending.
+Incomplete chunks are never accepted by analysis.
+
+The common six-method timing population is spatial interior, independently
+allowed WEC target, and actual ||F_WEC-F_raw||_2 <=1e-12 N. Native WEC scaled
+flags do not define unchanged force. Timing populations retain attempted
+failures. Quality and matched force-error comparison tables publish their
+own denominators, including one-sided failures. WEC can increase magnitude,
+reverse direction or modify an infeasible zero request; it is not universally
+a magnitude-reduction map. The directly measured pipeline includes WEC's
+online polygon construction; Direct alone has no such construction.
+
+Numerical settings (distinct from post-check tolerances)
+
+Direct and ICFM use finite analytic/decision-tree procedures, with no Newton
+budget. ICFM starts from midpoint 14.4 N and uses default pinv rank tolerance.
+Direct normalized interval tests include 1e-12 allowances. Independent checks
+remain necessary, especially near geometric degeneracies.
+
+Bounded QP: min 0.5*T'*T, W*T=F, both bounds retained. quadprog uses
+interior-point-convex, ConstraintTolerance=1e-10, OptimalityTolerance=1e-10,
+MaxIterations=200, Display=off, x0=[]. Other toolbox defaults are inherited.
+There is no relaxed-upper-bound fallback. Positive native exitflag is required.
+
+VTDA-L2: nullspace/pseudoinverse geometry, up to 100 polygon-walk visits;
+no native convergence certificate. Its fallback may return a feasible traced
+vertex rather than prove exact optimality. Exceptions and missing/nonfinite
+outputs are retained, not replaced by another method.
+
+ACTA: tol=1e-10 on absolute combined KKT 2-norm, midpoint tension/zero dual
+start, maxit=50, alpha=0.01, beta=0.5, maxls=60. Schur determinant safeguard
+is 1e-12*S11*S22. A last iterate at a budget limit is not native success.
+
+X-ACTA: delta=0.1 N, gamma=500, eta=1e-5, k2=k3=1; unit barrier weights.
+RAC and EAC each allow 100 accepted Newton steps, alpha=0.01, beta=0.5,
+maxls=60 (the 0:60 loop permits 61 trial evaluations). tol=1e-9 is scaled;
+force_tol=1e-8 also caps absolute equality infinity norm. Stationarity uses
+a bounded floating-point allowance up to sqrt(eps); equality checks are not
+relaxed. EAC equality includes its slack term, so the equality tolerance does
+not cap raw-force approximation error. EAC's same-call RAC initialization is
+not a previous-request warm start. Final tensions are not clipped.
+
+Original execution environment and warmup
+
+MATLAB 24.2.0.2833386 (R2024b) Update 4, PCWIN64; Intel Core i9-12900K,
+16 physical/24 logical processors; eight process workers. Recorded processor
+identifier: Intel64 Family 6 Model 151 Stepping 2, GenuineIntel.
+All eight workers completed 192 discarded warmup boundary calls. Warmup covers
+three requests, repeated eight times, for WEC and seven method/pipeline calls.
+Those 192 include pipeline calls that themselves invoke WEC and Direct.
+
+On the recorded Windows topology, worker affinity masks were
+3, 12, 48, 192, 768, 3072, 12288 and 49152; client mask 16711680. The policy
+is applied only when explicitly enabled and topology matches 16 physical/
+24 logical processors, then original masks are restored. Other systems skip
+this policy. The smoke wrapper defaults to two workers and affinity disabled;
+the explicit full profile retains the original eight-worker policy.
+
+Full-run capture elapsed: 5843.591001 seconds. This includes the complete
+capture loop and excludes startup/warmup and subsequent saved-data analysis.
+No repeat-until-fast loop, five-pass minimum, latency replacement or failure
+filter is present. Maximum timings are observed values on that system only.

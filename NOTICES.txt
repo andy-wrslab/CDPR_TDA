@@ -1,0 +1,16 @@
+SOURCE AND LICENSE NOTICES
+
+Method references and recorded implementation provenance are listed in
+docs/METHOD_SOURCES.txt and the individual function help text. Paper citations
+identify mathematical sources; they do not establish software authorship or
+equivalence to the original authors' implementations.
+
+ACTA and X-ACTA are equation-based MATLAB implementations. The comparison QP
+uses MATLAB quadprog with both tension bounds. No MATLAB or toolbox source code,
+font, manuscript PDF, reviewer correspondence or large raw data is redistributed
+in this package.
+
+No explicit redistribution license was supplied for the original local
+numerical files. This package does not assign a new license or imply a public
+release. MATLAB and its toolboxes require their own licenses. The authors can
+add an appropriate source-code license when release terms are settled.

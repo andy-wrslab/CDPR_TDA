@@ -1,0 +1,74 @@
+PACKAGE VALIDATION -- 8 OCTOBER 2026
+
+Environment and isolation
+
+MATLAB 24.2.0.2833386 (R2024b) Update 4, 64-bit Windows. The package was ZIPped,
+extracted into a new directory containing spaces, and run in a fresh MATLAB
+session after restoredefaultpath. The tests used the documented example and
+benchmark entry points, without adding the original development directory.
+The final executable files are checked against that clean tested extraction.
+
+Commands exercised from the extracted package root
+
+  addpath('examples');
+  result = run_example;
+  comparison = run_example('all');
+  addpath('benchmark');
+  capture = run_benchmark(fullfile(pwd,'smoke_results'));
+  tables = reproduce_saved_results(fullfile(pwd,'smoke_results'), ...
+      fullfile(pwd,'smoke_tables'));
+
+The Direct example passed. Requested force was approximately
+[-4.955131227; 0.055732486] N. Returned tensions were approximately
+[5.209314465; 3.800000000; 3.800000000; 6.876421727] N, in original cable order.
+Independent equilibrium error was 2.51215e-15 N and both bounds were satisfied.
+The all-method example passed for all six methods; its largest equilibrium
+error was 3.97205e-15 N. QP, ACTA and X-ACTA returned positive native flags.
+
+The new smoke benchmark captured all 192 requested rows and completed with
+status raw_complete. Its expected method failures were retained as data.
+Saved-data replay completed with status passed, no solver calls, and unchanged
+input hashes. The wrappers restored the working directory and MATLAB path;
+the worker pool they created was closed. The Direct example also passed after
+saved-data replay, confirming that replay guards did not leave it unusable.
+
+Full saved-data analysis
+
+The documented saved-data wrapper was also run on all 30,965,760 original
+requests, with interior_table=true and norm_statistics=true. This exercised
+the optional paths with the packaged inventory supplied as a relative path.
+It completed with status passed and all original input hashes unchanged.
+No solver or performance-timing calls occurred in this full saved-data replay.
+
+All ten published timing/quality/domain/paired-force CSVs were byte-identical
+to the original verified files. The norm statistics, exclusions and readback
+tables matched the previous verified outputs field for field. ICFM and QP
+retained 24,433,774 pairs; VTDA-L2 retained 24,375,822 after 57,952 exclusions.
+The analysis recomputed actual tensions' norms and physical acceptance from
+the saved vectors, rather than using rounded values in a prior report.
+
+Both absolute and relative path forms were exercised. Testing caught Java's
+startup-directory behavior for relative paths; the setup and analysis helpers
+now resolve them against MATLAB's Current Folder before canonicalization.
+Fresh-extraction example, smoke and full saved-data tests passed after this fix.
+
+Scope and preservation
+
+The 30,965,760-request benchmark itself was not rerun for this presentation
+release. The expensive full-capture command is documented but was not executed
+as a new full measurement during package validation. Its preserved harness was
+exercised through the small profile. The newly measured smoke times are not
+substitutes for any reported paper result.
+
+All seven numerical functions preserve every nonblank, non-comment source line,
+including inline comments, from the measured versions. The captured harness is
+byte-identical. The analysis helper's one metadata change is disclosed in
+benchmark/ANALYSIS_METADATA_CHANGE.txt. Source identities are in
+provenance/SOURCE_MANIFEST.csv; package hashes are in PACKAGE_MANIFEST.csv there.
+
+A separate reader reviewed the README without relying on development paths.
+The archive extraction instruction was corrected to review_v11_full/. The
+example's dependencies, cable ordering, units, bounds and status checks agree
+with the supplied functions. The package inventory contains only source,
+documentation, examples, reproduction support and provenance; generated data,
+test logs, temporary files and internal reviewer discussions are excluded.

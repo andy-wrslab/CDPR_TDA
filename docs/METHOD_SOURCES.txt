@@ -1,0 +1,94 @@
+METHOD SOURCES
+
+What these files are
+
+src/ contains documented copies of the seven numerical MATLAB files used in
+the saved comparison. Only full-line comments and blank lines were changed;
+executable lines are unchanged. Function names preserve the measured interfaces.
+The comments distinguish a mathematical method reference from software authorship.
+No repository URL, redistribution license or original-author-code equivalence is
+inferred from a paper citation or a function filename.
+
+Direct -- wt4_2024_minmax_v4.m
+
+The accompanying manuscript is titled "Efficient L2-Optimal
+Tension Distribution in Planar Translational Cable Driven Parallel Robots with
+2 Degrees of Redundancy." The implementation follows its
+Algorithm 1 (p. 6): particular solution Eq. (6), null basis Eq. (7), intervals
+Eqs. (11)-(12), reduced scalar objective Eq. (13), projection Eq. (14).
+The actual source forms the full Pm=N'*N. Its configuration labels II/III select
+the alpha2/alpha1 axis. WEC is a separate preprocessing function.
+
+ICFM -- wt_pott_v2.m
+
+The supplied manuscript identifies the method with reference [27]:
+A. Pott, "An improved force distribution algorithm for over-constrained
+cable-driven parallel robots," Proceedings of the 6th International Workshop
+on Computational Kinematics (CK2013), pp. 139-146, Springer, 2014.
+The earlier closed-form method is manuscript [25]: A. Pott, T. Bruckmann and
+L. Mikelsons, "Closed-form force distribution for parallel wire robots,"
+Computational Kinematics, pp. 25-34, Springer, 2009.
+The captured file has no paper citation or author-code origin declaration.
+The ICFM label maps the comparison method to the manuscript's literature context;
+it does not establish that the delivered MATLAB file is the authors' software.
+
+VTDA-L2 -- wt_gouttefarde_v2.m
+
+Manuscript reference [29]: M. Gouttefarde, J. Lamaury, C. Reichert and
+T. Bruckmann, "A versatile tension distribution algorithm for n-dof parallel
+robots driven by n+2 cables," IEEE Transactions on Robotics, vol. 31, no. 6,
+pp. 1444-1457, 2015. The captured MATLAB implementation includes a 100-visit
+safeguard and a feasible-vertex fallback. Those implementation branches are
+reported explicitly rather than treated as a proof of optimality or equivalence
+to original-author software. No author-code provenance is recorded in its header.
+
+Bounded QP -- wt_qp_bounded_v11.m
+
+The tested numerical backend is MATLAB quadprog, interior-point-convex,
+Optimization Toolbox 24.2 with MATLAB R2024b Update 4. The local wrapper solves
+min 0.5*T'*T with equality and both box bounds; see FUNCTION_REFERENCE for options.
+The commercial MATLAB/toolbox implementation is not included here.
+
+ACTA -- wt_acta.m
+
+V. Di Paola, A. Goldsztejn, M. Zoppi and S. Caro, "Analytic Centre Based Tension
+Distribution for Cable-Driven Platforms (CDPs)," Journal of Mechanisms and
+Robotics, vol. 16, no. 8, article 081018, 2024.
+DOI recorded in the original header: 10.1115/1.4065244.
+Source scope: Section 4, Eqs. (12)-(18), Algorithm 1; manuscript reference [22].
+The original header explicitly describes an equation-based implementation and
+states that no authors' code was available or used. It cites S. Boyd and
+L. Vandenberghe, Convex Optimization (2004), Algorithm 10.2, p. 531, for the
+infeasible-start Newton method and Section 10.4.2 for block elimination.
+Cold starts, finite iteration/line-search limits and numerical safeguards are
+implementation choices, not a claim to reproduce the authors' program or timings.
+
+X-ACTA -- wt_xacta.m
+
+D. Dona', V. Di Paola, A. Trevisani and M. Zoppi, "X-ACTA: eXtended Analytic
+Center Tension distribution Algorithm for fixed and mobile
+cable-driven-parallel-robot," arXiv:2607.08265v1, 2026.
+Paper source recorded in the original header:
+https://arxiv.org/html/2607.08265v1
+Source scope: Eqs. (14)-(21); manuscript reference [23].
+The original header explicitly says no author code was used. The current MATLAB
+implementation uses affine-coordinate RAC, the eliminated EAC Schur equations,
+unit barrier weights and disclosed numerical safeguards. These are mathematical
+implementation choices; regression agreement with archived local code is not
+evidence of original-author-code equivalence.
+
+WEC -- WEC_v5.m
+
+Manuscript reference [34]: G. Boschetti, C. Passarini, A. Trevisani and
+D. Zanotto, "A fast algorithm for wrench exertion capability computation,"
+Cable-Driven Parallel Robots (C. Gosselin, P. Cardou, T. Bruckmann and A. Pott,
+editors), pp. 292-303, Springer International Publishing, 2018.
+This is the manuscript's method context. The captured file does not contain an
+explicit source-code attribution or license. The delivered implementation's signed
+force-line and zero-command behavior is documented from its actual source.
+
+Attribution limits
+
+Bibliographic entries above come from the accompanying manuscript and existing
+source headers. A mathematical reference is not a software-license grant or
+an assertion that a file is original-author code. See NOTICES.txt.
