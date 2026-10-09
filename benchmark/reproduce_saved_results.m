@@ -18,7 +18,7 @@ function result = reproduce_saved_results(inputDir,outputDir,options)
 %   12 GB free disk for physical raw copies and several GB of working RAM.
 %   Generated captured_replay/T_L2_matched.csv is the old QP-relative analysis,
 %   NOT the current DM-relative L2 result. Only the optional norm_statistics
-%   path produces the latter; see README.txt for their distinct denominators.
+%   path produces the latter; see README.md for their distinct denominators.
 %
 %   Example:
 %     addpath('benchmark');

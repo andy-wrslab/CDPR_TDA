@@ -1,5 +1,11 @@
 PRESENTATION CHANGES -- 8 OCTOBER 2026
 
+GitHub README presentation -- 9 October 2026
+  Converted the root and benchmark READMEs to Markdown with headings, links,
+  dependency/method tables and fenced MATLAB examples. Updated the saved-replay
+  help reference to README.md. Numerical statements and documented commands are
+  unchanged; source and package manifests reflect the presentation edits.
+
 Preserved
   Numerical statements in the seven numerical functions are preserved after
   the function-name mapping below. No arithmetic, branching, solver setting,
