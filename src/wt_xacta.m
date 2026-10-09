@@ -4,11 +4,11 @@ function WDM = wt_xacta(WDM,P,F)
 %   when activation requires it. It accepts the raw requested force and
 %   does not call WEC. EAC permits force error while keeping strict bounds.
 %
-% INPUTS (the reviewed planar four-cable setup)
+% INPUTS (the benchmark planar four-cable setup)
 %   WDM.param.M       2-by-4 anchor positions [mm], in fixed CCW cable order.
 %   WDM.param.lim_inf  4-by-1 lower tension bounds [N]; all equal and positive.
 %   WDM.param.lim_sup  4-by-1 upper tension bounds [N]; all equal, above lim_inf.
-%   WDM.param.TOLL     Numerical zero/geometric cutoff (reviewed value 1e-14).
+%   WDM.param.TOLL     Numerical zero/geometric cutoff (benchmark value 1e-14).
 %   WDM.verbose       Logical scalar; use false for numerical calls.
 %   P                 2-by-1 known platform position [mm].
 %   F                 2-by-1 requested Cartesian force [N].
@@ -16,7 +16,7 @@ function WDM = wt_xacta(WDM,P,F)
 % Return a new output struct from a fresh parameter struct on each call.
 % See docs/FUNCTION_REFERENCE.txt for the complete common contract and checks.
 %
-% The reviewed contract is planar 2-by-4; this function also validates general
+% The benchmark contract is planar 2-by-4; this function also validates general
 % n-by-m anchors (n<=m), n-vector P/F, and scalar or m-vector ordered bounds.
 % RAC starts from the affine projection of the box midpoint, with zero null
 % coordinates; its relaxed barrier allows intermediate bound violations.
@@ -54,7 +54,7 @@ function WDM = wt_xacta(WDM,P,F)
 % D. Dona', V. Di Paola, A. Trevisani and M. Zoppi (2026), X-ACTA: eXtended
 % Analytic Center Tension distribution Algorithm for fixed and mobile
 % cable-driven-parallel-robot, arXiv:2607.08265v1, Eqs. 14-21.
-% Paper source recorded by the measured header:
+% Paper source:
 % https://arxiv.org/html/2607.08265v1
 % The numerical formulations and safeguards are implementation choices.
 

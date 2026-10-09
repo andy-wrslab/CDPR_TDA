@@ -4,11 +4,11 @@ function WDM = wt_qp_bounded(WDM,P,F)
 %   and lim_inf<=T<=lim_sup using MATLAB quadprog. Both bounds are retained
 %   on every solve; there is no upper-bound-removal fallback.
 %
-% INPUTS (the reviewed planar four-cable setup)
+% INPUTS (the benchmark planar four-cable setup)
 %   WDM.param.M       2-by-4 anchor positions [mm], in fixed CCW cable order.
 %   WDM.param.lim_inf  4-by-1 lower tension bounds [N]; all equal and positive.
 %   WDM.param.lim_sup  4-by-1 upper tension bounds [N]; all equal, above lim_inf.
-%   WDM.param.TOLL     Numerical zero/geometric cutoff (reviewed value 1e-14).
+%   WDM.param.TOLL     Numerical zero/geometric cutoff (benchmark value 1e-14).
 %   WDM.verbose       Logical scalar; use false for numerical calls.
 %   P                 2-by-1 known platform position [mm].
 %   F                 2-by-1 requested Cartesian force [N].
@@ -18,7 +18,7 @@ function WDM = wt_qp_bounded(WDM,P,F)
 %
 % Requires Optimization Toolbox. Geometry and H=I are rebuilt on each call.
 % The constant options object is cached per MATLAB process; x0=[] and no
-% previous tension solution is reused. Reviewed options: interior-point-convex,
+% previous tension solution is reused. Benchmark options: interior-point-convex,
 % ConstraintTolerance=1e-10, OptimalityTolerance=1e-10, MaxIterations=200,
 % Display=off. Other quadprog options use the installed MATLAB defaults.
 %

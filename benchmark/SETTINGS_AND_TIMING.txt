@@ -1,21 +1,19 @@
 MEASURED SETTINGS AND TIMING BOUNDARIES
 
-Captured source authority
+Source and data identity
 
-captured/compare_methods.m preserves the completed full run's numerical
-operations and timing boundaries after the documented function-name mapping
-and metadata-only log/default-directory renames. The original harness hash was
+captured/compare_methods.m defines the measurement harness. Each capture
+snapshots its numerical sources and records their SHA-256 hashes in its manifest.
+provenance/SOURCE_MANIFEST.csv at the package root lists package source files
+and their hashes. provenance/FULL_DATA_INVENTORY.csv identifies the published
+saved-run data and source snapshots. The published-run harness snapshot has
 SHA-256 05d5133cc5e8f38b0f97a12806d8784335f09597922ead03961edc44f8fb9dc7.
-The numerical src/ files likewise preserve numerical statements after the name
-mapping. Their comments explain interfaces and limitations. Original/current
-source identities are in provenance/SOURCE_MANIFEST.csv at the package root.
-Every new capture snapshots the staged sources and records their hashes.
 
 Common geometry and force grid
 
 Anchors, in cable order (mm): (-315,-315), (315,-315), (315,315), (-315,315).
 Tension bounds: 3.8 <= T_i <= 25 N. The columns of W are platform-to-anchor
-unit directions; length <=1e-14 uses the retained zero-column convention.
+unit directions; length <=1e-14 uses a zero column.
 TOLL=1e-14; WEC inward margin TOLL_WEC=1e-9 N; verbose=false.
 Full pose coordinates: linspace(0,315,64) on each axis. Magnitudes:
 linspace(0,10,21). Angles: 360 directions from 0 to 2*pi, endpoint excluded.
@@ -102,7 +100,7 @@ relaxed. EAC equality includes its slack term, so the equality tolerance does
 not cap raw-force approximation error. EAC's same-call RAC initialization is
 not a previous-request warm start. Final tensions are not clipped.
 
-Original execution environment and warmup
+Reported execution environment and warmup
 
 MATLAB 24.2.0.2833386 (R2024b) Update 4, PCWIN64; Intel Core i9-12900K,
 16 physical/24 logical processors; eight process workers. Recorded processor
@@ -116,9 +114,10 @@ On the recorded Windows topology, worker affinity masks were
 is applied only when explicitly enabled and topology matches 16 physical/
 24 logical processors, then original masks are restored. Other systems skip
 this policy. The smoke wrapper defaults to two workers and affinity disabled;
-the explicit full profile retains the original eight-worker policy.
+the explicit full profile uses eight workers with that affinity policy.
 
 Full-run capture elapsed: 5843.591001 seconds. This includes the complete
 capture loop and excludes startup/warmup and subsequent saved-data analysis.
-No repeat-until-fast loop, five-pass minimum, latency replacement or failure
-filter is present. Maximum timings are observed values on that system only.
+Each eligible public call is measured once; attempted failures and observed
+stalls remain in the saved results. Maximum timings are observed values on
+that system only.

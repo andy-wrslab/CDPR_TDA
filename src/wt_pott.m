@@ -5,11 +5,11 @@ function WDM=wt_pott(WDM,P,F)
 %   nested steps. Lower-bound violations are tested before upper violations.
 %   This is not a quadprog call and is not an L2-optimality certificate.
 %
-% INPUTS (the reviewed planar four-cable setup)
+% INPUTS (the benchmark planar four-cable setup)
 %   WDM.param.M       2-by-4 anchor positions [mm], in fixed CCW cable order.
 %   WDM.param.lim_inf  4-by-1 lower tension bounds [N]; all equal and positive.
 %   WDM.param.lim_sup  4-by-1 upper tension bounds [N]; all equal, above lim_inf.
-%   WDM.param.TOLL     Numerical zero/geometric cutoff (reviewed value 1e-14).
+%   WDM.param.TOLL     Numerical zero/geometric cutoff (benchmark value 1e-14).
 %   WDM.verbose       Logical scalar; use false for numerical calls.
 %   P                 2-by-1 known platform position [mm].
 %   F                 2-by-1 requested Cartesian force [N].
@@ -32,17 +32,16 @@ function WDM=wt_pott(WDM,P,F)
 % Check the result independently; scale_dir does not certify equilibrium.
 % No custom pinv tolerance, iterative stopping rule, or warm-start state is
 % used. Method reference: A. Pott (2014), manuscript reference [27]; see
-% METHOD_SOURCES.txt. The captured file does not establish author-code origin.
+% docs/METHOD_SOURCES.txt for implementation attribution.
 
 Tmin=WDM.param.lim_inf;
 Tmax=WDM.param.lim_sup;
 WDM.scale_dir=0;
 WDM.param.M_eff=WDM.param.M;
-% WDM.str_align=[];
 
 WDM.param.M_eff=WDM.param.M;
 
-%calcolo versori
+% Unit cable directions from the platform to the anchors.
 v = WDM.param.M_eff-repmat(P,1,size(WDM.param.M_eff,2));
 for i=1:size(WDM.param.M_eff,2)
     d=norm(v(:,i)); d=(d>WDM.param.TOLL)*d;
@@ -56,7 +55,6 @@ end
 v_pott = v;
 F_pott = -F;
 T_mean = (Tmin + Tmax) / 2;
-% T_mean = Tmin;
 T_pott = T_mean - pinv(v_pott) * (F_pott + v_pott * T_mean);
 Tmin_pott = Tmin(1);
 Tmax_pott = Tmax(1);
@@ -118,10 +116,6 @@ end
 
 
 T = T_pott;
-%% QP
-% % Forza=WDM.F';
-% Forza=F';
-% T=quadprog(eye(size(WDM.param.M_eff,2)),[],[],[],v,Forza,Tmin,[],Tmin,opt)
 %% output
 WDM.T=T;
 if (sum(WDM.T<=Tmax)~=length(WDM.T) || sum(WDM.T>=Tmin)~=length(WDM.T))
@@ -133,9 +127,6 @@ WDM.cable_n=sum(abs((WDM.T-Tmin)./Tmin)>1e-6);
 WDM.active=WDM.T>Tmin;
 WDM.case=nan;
 
-% global T_pott_saved T_qp_saved
-% T_pott_saved = [T_pott_saved, T_pott];
-% T_qp_saved = [T_qp_saved, T];
 
 
 

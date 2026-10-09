@@ -5,11 +5,11 @@ function [F_new, is_scaled] = WEC(WDM,P,F)
 %   intersects the SIGNED force line with that polygon and adjusts the
 %   force by the inward TOLL_WEC margin when needed.
 %
-% INPUTS (the reviewed planar four-cable setup)
+% INPUTS (the benchmark planar four-cable setup)
 %   WDM.param.M       2-by-4 anchor positions [mm], in fixed CCW cable order.
 %   WDM.param.lim_inf  4-by-1 lower tension bounds [N]; all equal and positive.
 %   WDM.param.lim_sup  4-by-1 upper tension bounds [N]; all equal, above lim_inf.
-%   WDM.param.TOLL     Numerical zero/geometric cutoff (reviewed value 1e-14).
+%   WDM.param.TOLL     Numerical zero/geometric cutoff (benchmark value 1e-14).
 %   WDM.verbose       Logical scalar; use false for numerical calls.
 %   P                 2-by-1 known platform position [mm].
 %   F                 2-by-1 requested Cartesian force [N].
@@ -18,13 +18,13 @@ function [F_new, is_scaled] = WEC(WDM,P,F)
 % See docs/FUNCTION_REFERENCE.txt for the complete common contract and checks.
 %
 % Also requires WDM.param.TOLL_WEC, an inward force margin [N] (1e-9 in the
-% reviewed setup). Equal cable bounds are required: only their first entries
+% benchmark setup). Equal cable bounds are required: only their first entries
 % are used to build the four-cable box. No tensions are returned by WEC.
 %
 % OUTPUTS
 %   F_NEW       2-by-1 adjusted force [N], or NaN(2,1) when the nonzero
 %               requested force line does not intersect the attainable set.
-%   IS_SCALED   Legacy logical flag: false only for the unchanged nonzero
+%   IS_SCALED   Logical flag: false only for the unchanged nonzero
 %               branch; true on other branches, including unchanged zero.
 % Compute norm(F_NEW-F,2) separately to determine actual force change. Signed
 % line adjustment can reduce, increase, or reverse F; it is not constrained
@@ -36,7 +36,7 @@ function [F_new, is_scaled] = WEC(WDM,P,F)
 % false for numerical calls. Geometry/hull are rebuilt, with no lookup cache.
 % Method context: Boschetti, Passarini, Trevisani and Zanotto (2018), A fast
 % algorithm for wrench exertion capability computation, manuscript [34].
-% See METHOD_SOURCES.txt; the captured file does not establish author-code origin.
+% Implementation attribution is documented in docs/METHOD_SOURCES.txt.
 
 is_scaled = true;
 v = WDM.param.M-repmat(P,1,size(WDM.param.M,2));
@@ -58,7 +58,6 @@ if nr ==0
     isnull_F=true;
     vr=v;
     Rrb=eye(2); 
-    %WDM.scale_dir=0;
 else
     isnull_F=false;
     ur=F/nr;
@@ -66,20 +65,10 @@ else
     vr=Rrb'*v; % rotated struct matrix
 end
 
-%% define orthotope
+%% Tension-box vertices
 
-% V_char = dec2bin([0:(2^4-1)],4)';
-% V=nan(size(V_char));
-% for j=1:size(V_char,2)
-%     for i=1:size(V_char,1)
-%         eval(['V(i,j)=[' V_char(i,j) ']'';']);
-%     end
-% end
-% idx=logical(V);
-% V(idx)=Tmax;
-% V(~idx)=Tmin;
 
-% this should save some time (define vertices explicitly)
+% Define the 16 tension-box vertices explicitly.
 V =[
     Tmin     Tmin     Tmin     Tmin     Tmin     Tmin     Tmin     Tmin     Tmax     Tmax     Tmax     Tmax     Tmax     Tmax     Tmax     Tmax
     Tmin     Tmin     Tmin     Tmin     Tmax     Tmax     Tmax     Tmax     Tmin     Tmin     Tmin     Tmin     Tmax     Tmax     Tmax     Tmax
@@ -122,10 +111,8 @@ if ~(isnull_F)
     end
     %
     % compute subsets of edges:
-    %n(:,1)=(abs(n(:,1))>WDM.param.TOLL).*n(:,1);
     idx_P=n(:,1)>0;
     idx_Q=n(:,1)<0;
-    %idx_S=n(:,1)==0;
 
     lambda_wmax=min(delta(idx_P)./n(idx_P,1));
     lambda_wmin=max(delta(idx_Q)./n(idx_Q,1));
@@ -140,36 +127,21 @@ if ~(isnull_F)
         % F is feasible
         F_new=F;
         is_scaled = false;
-        %disp('not changed')
-        %disp('case A1')
     elseif (nr<Fmin_safe)
         F_new=Fmin_safe*Rrb*[1;0];
-        % WDM.verbose=true;
-        %disp('changed to Fmin')
-        %disp('case A2')
     else
         F_new=Fmax_safe*Rrb*[1;0];
-        % WDM.verbose=true;
-        %disp('changed to Fmax')
-        %disp('case A3')
     end
 elseif (isnull_F) && (sum(delta>=0)==length(delta))
     %% origin inside, null force - do nothing
-    %disp('case B')
-    % disp(char(13));
 else
     %% origin outside, null force – pick closest point
     [dist, closestPoint] = closestPointToOrigin(U');
     F_new=(dist+WDM.param.TOLL_WEC)*(closestPoint'/dist); %safe point
-    %disp('case C')
-    % disp(F)
-    % disp(F_new)
-    % disp(char(13));
-    % WDM.verbose=true;
 end
 
 
-%% debug plot
+%% Optional diagnostic plot
 if WDM.verbose
     myfig=figure;
     h1=plot(U_all(1,:),U_all(2,:),'ok');hold on;

@@ -1,107 +1,69 @@
-PACKAGE VALIDATION -- 8 OCTOBER 2026
-
-Validation scope
-
-The results below describe the preceding package, before revision suffixes
-were removed from public function names. They remain evidence for its numerical
-implementation and full saved-data analysis. They do not by themselves validate
-the renamed files or their updated references.
-
-Current package checks
-
-The renamed package passed fresh-extraction tests in MATLAB R2024b Update 4
-after restoredefaultpath. The Direct example and all six comparison methods
-passed; the complete all-method example outputs were exactly equal to those
-from the preceding package, including tensions, residuals and native statuses.
-
-The new 192-request smoke capture completed with status raw_complete and the
-manifest recorded the renamed functions. Saved-data replay passed with unchanged
-input hashes. The worker pool closed and the original path/folder were restored.
-Replaying the preceding package's 192-request saved capture also passed; all
-nine published CSV tables were exactly equal to their preceding outputs. The
-Direct example still passed after both replays.
-
-All 14 MATLAB files were checked against the exact documented name/reference
-transformation of the preceding package. Numerical statements, solver settings
-and measured timer boundaries are preserved. The five historical norm-analysis
-input filenames and the full-data inventory remain unchanged. All final MATLAB
-executable statements match the tested extraction. A harness help example was
-clarified afterward to pass false explicitly for the omitted plot helper.
-No new full-grid benchmark or full saved-data replay is claimed for the renamed
-package; the full-data evidence below remains
-the preceding package's analysis.
+PACKAGE VALIDATION
 
 Environment and isolation
 
-MATLAB 24.2.0.2833386 (R2024b) Update 4, 64-bit Windows. The package was ZIPped,
-extracted into a new directory containing spaces, and run in a fresh MATLAB
-session after restoredefaultpath. The tests used the documented example and
-benchmark entry points, without adding the original development directory.
-Those executable files were checked against that clean tested extraction.
+Validation used MATLAB 24.2.0.2833386 (R2024b) Update 4 on 64-bit Windows.
+The package was extracted into a clean directory containing spaces and tested
+in a fresh MATLAB session after restoredefaultpath. Examples and benchmark
+entry points located their dependencies within the package.
 
-Commands exercised in the preceding package
+Example checks
+
+The following commands run from the extracted package root:
 
   addpath('examples');
   result = run_example;
   comparison = run_example('all');
+
+The Direct example returned tensions approximately
+[5.209314465; 3.800000000; 3.800000000; 6.876421727] N for requested force
+[-4.955131227; 0.055732486] N. Tension rows follow the anchor-column order.
+Independent equilibrium error was 2.51215e-15 N and the tension bounds were
+satisfied. All six methods passed the comparison example; the largest
+equilibrium error was 3.97205e-15 N. QP, ACTA and X-ACTA returned positive
+native exit flags.
+
+Small benchmark and saved-data checks
+
   addpath('benchmark');
   capture = run_benchmark(fullfile(pwd,'smoke_results'));
   tables = reproduce_saved_results(fullfile(pwd,'smoke_results'), ...
       fullfile(pwd,'smoke_tables'));
 
-The Direct example passed. Requested force was approximately
-[-4.955131227; 0.055732486] N. Returned tensions were approximately
-[5.209314465; 3.800000000; 3.800000000; 6.876421727] N, in original cable order.
-Independent equilibrium error was 2.51215e-15 N and both bounds were satisfied.
-The all-method example passed for all six methods; its largest equilibrium
-error was 3.97205e-15 N. QP, ACTA and X-ACTA returned positive native flags.
+Use new output directories. The 192-request capture completed with status
+raw_complete. Expected method failures were retained as data. Saved-data
+reproduction completed with status passed and unchanged input hashes.
+The nine published CSV tables were reproduced exactly from the same saved
+observations. Replay invoked no solver or performance-timing calls.
+The entry points restored the caller's working directory and MATLAB path;
+the worker pool created for the capture was closed. The Direct example also
+passed after saved-data replay. Both absolute and relative paths were checked.
 
-The new smoke benchmark captured all 192 requested rows and completed with
-status raw_complete. Its expected method failures were retained as data.
-Saved-data replay completed with status passed, no solver calls, and unchanged
-input hashes. The wrappers restored the working directory and MATLAB path;
-the worker pool they created was closed. The Direct example also passed after
-saved-data replay, confirming that replay guards did not leave it unusable.
+Full saved-data verification
 
-Full saved-data analysis of the preceding package
-
-The documented saved-data wrapper was also run on all 30,965,760 original
-requests, with interior_table=true and norm_statistics=true. This exercised
-the optional paths with the packaged inventory supplied as a relative path.
-It completed with status passed and all original input hashes unchanged.
-No solver or performance-timing calls occurred in this full saved-data replay.
-
-All ten published timing/quality/domain/paired-force CSVs were byte-identical
-to the original verified files. The norm statistics, exclusions and readback
-tables matched the previous verified outputs field for field. ICFM and QP
+The reported full dataset contains 30,965,760 requests. Hash-checked analysis
+with the interior-force and actual-tension norm options reproduced all ten
+timing, quality, domain and paired-force CSV tables. Norm statistics,
+exclusions and readback tables agreed with the supplied results. ICFM and QP
 retained 24,433,774 pairs; VTDA-L2 retained 24,375,822 after 57,952 exclusions.
-The analysis recomputed actual tensions' norms and physical acceptance from
-the saved vectors, rather than using rounded values in a prior report.
+The analysis recomputed norms and physical acceptance from the saved tension
+vectors. Input hashes were unchanged and no solver or performance-timing
+calls occurred during this saved-data analysis.
 
-Both absolute and relative path forms were exercised. Testing caught Java's
-startup-directory behavior for relative paths; the setup and analysis helpers
-now resolve them against MATLAB's Current Folder before canonicalization.
-Fresh-extraction example, smoke and full saved-data tests passed after this fix.
+Scope and interpretation
 
-Scope and preservation
+The example and 192-request test verify execution and data handling; they do
+not independently repeat the full experiment or establish its timing ratios.
+Reported performance statistics use the full saved capture. A new full capture
+is an explicit, computationally expensive operation described in benchmark/.
+Observed maxima are measurements, not worst-case execution guarantees.
 
-The 30,965,760-request benchmark itself was not rerun for this presentation
-release. The expensive full-capture command is documented but was not executed
-as a new full measurement during package validation. Its preserved harness was
-exercised through the small profile. The newly measured smoke times are not
-substitutes for any reported paper result.
+Package verification checks that numerical operations, solver settings and
+timing boundaries match those used for the reported experiment. This checks
+the identity of the measured implementation; it does not establish equivalence
+to the original method authors' software.
 
-The current seven numerical functions preserve numerical statements after the
-documented function-name mapping. The harness also retains its numerical
-operations and timing boundaries; function references and metadata-only log/
-default-directory names have changed. Analysis metadata edits are disclosed in
-benchmark/ANALYSIS_METADATA_CHANGE.txt. Source identities and original names are
-in provenance/SOURCE_MANIFEST.csv; package hashes are in PACKAGE_MANIFEST.csv
-there. Comments and filenames are not used as evidence of numerical equivalence.
-
-A separate reader reviewed the README without relying on development paths.
-The archive extraction instruction was corrected to review_v11_full/. The
-example's dependencies, cable ordering, units, bounds and status checks agree
-with the supplied functions. The package inventory contains only source,
-documentation, examples, reproduction support and provenance; generated data,
-test logs, temporary files and internal reviewer discussions are excluded.
+provenance/SOURCE_MANIFEST.csv identifies the supplied MATLAB source files.
+provenance/PACKAGE_MANIFEST.csv records package-file sizes and SHA-256 hashes.
+provenance/FULL_DATA_INVENTORY.csv identifies the separately supplied full
+dataset, including the source snapshots recorded with that experiment.

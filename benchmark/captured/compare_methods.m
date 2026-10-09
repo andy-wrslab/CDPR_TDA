@@ -1,13 +1,12 @@
 function result = compare_methods(config)
-%COMPARE_METHODS Fresh matched post-WEC and raw-force reviewer experiment.
+%COMPARE_METHODS Matched post-WEC and raw-force benchmark experiment.
 %   config.profile='full' uses all 30,965,760 original grid inputs; 'smoke'
 %   uses 192. Every retained series has one observation per attempted input.
-%   Eight fresh series: WEC alone; five allocations after the identical
+%   Eight measured series: WEC alone; five allocations after the identical
 %   checked WEC force; X-ACTA on the raw force; directly timed WEC+DM.
 %   Nonfinite/physically invalid shared WEC skips the five dependent calls.
 %   The direct pipeline includes WEC and finite dispatch checks, attempts DM
 %   on every finite WEC force, and is physically assessed after timing.
-%   No zero substitution, timing replacement, re-timing, or best-of selection.
 %   config.analyze=false captures raw data only; summarize_results(outdir,false)
 %   can be run separately. Raw arrays require completed_chunks=true; pending
 %   preallocated rows are undefined until their chunk has been written.

@@ -8,7 +8,7 @@ function result = reproduce_saved_results(inputDir,outputDir,options)
 %
 %   OPTIONS.interior_table=false: optional independent-readback-based interior
 %   table, requiring INPUTDIR/independent_readback_audit.mat from the original
-%   physical audit. OPTIONS.norm_statistics=false: optional final DM-relative
+%   physical audit. OPTIONS.norm_statistics=false: optional DM-relative
 %   L2 statistics for the original full run, requiring OPTIONS.inventory_file
 %   and original masks, T_quality, completion receipt and source snapshots.
 %   Norm analysis is deliberately unsupported on the small smoke profile.
@@ -16,9 +16,9 @@ function result = reproduce_saved_results(inputDir,outputDir,options)
 %   Saved-data replay uses base MATLAB R2024b and Java. Neither Optimization
 %   nor Parallel Computing Toolbox is required. Full replay needs about
 %   12 GB free disk for physical raw copies and several GB of working RAM.
-%   Generated captured_replay/T_L2_matched.csv is the old QP-relative analysis,
-%   NOT the current DM-relative L2 result. Only the optional norm_statistics
-%   path produces the latter; see README.md for their distinct denominators.
+%   Generated captured_replay/T_L2_matched.csv reports QP-relative differences.
+%   The optional norm_statistics path reports DM-relative actual-tension
+%   L2 differences; see README.md for their distinct denominators.
 %
 %   Example:
 %     addpath('benchmark');
@@ -96,13 +96,13 @@ for k=1:numel(sources),sourceHashes(k)=struct('file',sources{k},'sha256',sha256(
 result=struct('status','passed','ninputs',manifest.ninputs,'input_files_unchanged',true, ...
     'new_solver_calls',0,'new_timing_observations',0,'published_tables',{publish}, ...
     'options',options,'input_hashes',records,'analysis_sources',sourceHashes, ...
-    'warning','captured_replay/T_L2_matched.csv is historical QP-relative output; use norm_analysis for current DM-relative norms');
+    'warning','captured_replay/T_L2_matched.csv reports QP-relative differences; use norm_analysis for DM-relative actual-tension norms');
 fid=fopen(fullfile(outputDir,'saved_reproduction_receipt.json'),'w');assert(fid>=0);
 fprintf(fid,'%s\n',jsonencode(result,'PrettyPrint',true));fclose(fid);
 fid=fopen(fullfile(outputDir,'TABLES_README.txt'),'w');assert(fid>=0);
 fprintf(fid,'Selected timing, quality, domain and matched complete-path tables were replayed from saved raw observations. All attempted failures and timing tails are retained.\n');
-fprintf(fid,'The captured_replay subfolder retains exact historical helper outputs, including a QP-relative L2 table and descriptive report. They are not the final DM-relative L2 analysis or paper figures.\n');
-fprintf(fid,'The current DM-relative L2 statistics are generated only by options.norm_statistics=true into norm_analysis, requiring the original full-run input and inventory.\n');
+fprintf(fid,'The captured_replay subfolder contains the QP-relative L2 comparison and a descriptive report. The norm_analysis subfolder contains DM-relative actual-tension statistics when requested. No figures are generated.\n');
+fprintf(fid,'DM-relative L2 statistics require options.norm_statistics=true, the complete full-run input and its inventory, and are written to norm_analysis.\n');
 fclose(fid);
 fprintf('Saved-data reproduction passed: %d inputs; no solver calls.\n',summary.manifest.ninputs);
 end

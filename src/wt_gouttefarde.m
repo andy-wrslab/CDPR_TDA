@@ -4,11 +4,11 @@ function WDM=wt_gouttefarde(WDM,P,F)
 %   traces the feasible polygon, and tests vertex/edge L2 candidates. It may
 %   fall back to the minimum-norm feasible vertex that it traced.
 %
-% INPUTS (the reviewed planar four-cable setup)
+% INPUTS (the benchmark planar four-cable setup)
 %   WDM.param.M       2-by-4 anchor positions [mm], in fixed CCW cable order.
 %   WDM.param.lim_inf  4-by-1 lower tension bounds [N]; all equal and positive.
 %   WDM.param.lim_sup  4-by-1 upper tension bounds [N]; all equal, above lim_inf.
-%   WDM.param.TOLL     Numerical zero/geometric cutoff (reviewed value 1e-14).
+%   WDM.param.TOLL     Numerical zero/geometric cutoff (benchmark value 1e-14).
 %   WDM.verbose       Logical scalar; use false for numerical calls.
 %   P                 2-by-1 known platform position [mm].
 %   F                 2-by-1 requested Cartesian force [N].
@@ -40,9 +40,8 @@ function WDM=wt_gouttefarde(WDM,P,F)
     WDM.scale_dir=0;
     WDM.fallback=0;   % 1 = solution is the min-norm feasible vertex, not the KKT optimum
     WDM.param.M_eff=WDM.param.M;
-    % WDM.str_align=[];
     
-    %calcolo versori
+    % Unit cable directions from the platform to the anchors.
     v = WDM.param.M_eff-repmat(P,1,size(WDM.param.M_eff,2));
     for i=1:size(WDM.param.M_eff,2)
         d=norm(v(:,i)); d=(d>WDM.param.TOLL)*d;
@@ -88,11 +87,6 @@ function WDM=wt_gouttefarde(WDM,P,F)
     vertices = v_f;
 
 
-    % debug
-    % for ii=1:4
-    %     y == solve(constraints(ii) <= N(ii,:) * [x, y]',y)
-    %     y == solve(constraints(ii+4) <= N(ii,:) * [x, y]',y)
-    % end
 
     % find I
     I = find(constraints(1:4) - WDM.param.TOLL <= N * v_f & constraints(5:8) + WDM.param.TOLL >= N * v_f);
@@ -224,7 +218,6 @@ function WDM=wt_gouttefarde(WDM,P,F)
             mu = get_inv([a_i', a_j']) * v_ij;
 
             if all(mu>0)
-%                 disp("vertex")
                 lambda = v_ij;
                 break
             end
@@ -234,7 +227,6 @@ function WDM=wt_gouttefarde(WDM,P,F)
             for i = 1:length(n_list)
                 [a_i,~,~,mu_i,~] = get_mu(i,n_list,b_list,N,t_p,Tmin,Tmax);
                 if mu_i >= 0
-%                     disp("edge")
                     lambda = (mu_i * a_i)';
                     break
                 end

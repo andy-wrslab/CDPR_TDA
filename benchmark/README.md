@@ -2,7 +2,7 @@
 
 This folder provides two distinct entry points. `run_benchmark` makes new timing observations; `reproduce_saved_results` only analyzes an existing saved capture. The default capture is a small 192-input smoke check, not the full experiment.
 
-The measured harness is supplied in [captured/](captured/) with revision suffixes removed from function names and their references. Generated log/default-directory names were also updated. The summary helper omits an unused plot-source dependency; all numerical calculations, settings and timing boundaries are unchanged. The wrapper stages the harness beside copies of the seven package [src/](../src/) functions so its source-resolution checks continue to work. Source identities and the original-to-current name mapping are in [`provenance/SOURCE_MANIFEST.csv`](../provenance/SOURCE_MANIFEST.csv).
+The capture wrapper stages the harness in [captured/](captured/) beside the seven numerical functions in [src/](../src/). Each capture records source identities in its manifest. [`provenance/SOURCE_MANIFEST.csv`](../provenance/SOURCE_MANIFEST.csv) lists the package source files and their SHA-256 hashes.
 
 ## Quick test from the extracted package root
 
@@ -48,26 +48,26 @@ Nine selected CSVs are published at the new output root:
 - `T_force_approximation.csv`
 - `T_complete_paths_matched.csv`
 
-`saved_reproduction_receipt.json` records input identities, source hashes, `options` and successful completion. These hashes establish which inputs were replayed; without the original inventory they do not independently authenticate a downloaded historical run.
+`saved_reproduction_receipt.json` records input identities, source hashes, `options` and successful completion. These hashes establish which inputs were replayed; without the published-run inventory they do not independently authenticate downloaded data.
 
-The captured summary helper also writes `T_L2_matched.csv` and a descriptive report inside `captured_replay`. This is the historical QP-relative analysis with different filtering, NOT the final DM-relative norm comparison. It is not published at the output root. The wrapper never generates the old captured diagnostic plots, and their plotting source is not shipped. The summary's unconditional provenance-source list was shortened by one filename so it can run with plotting disabled; its numeric calculations are unchanged. The source identities and metadata edits are in [`ANALYSIS_METADATA_CHANGE.txt`](ANALYSIS_METADATA_CHANGE.txt) and [`provenance/SOURCE_MANIFEST.csv`](../provenance/SOURCE_MANIFEST.csv) at the package root. No generated historical figures, run logs or rebuttal text are shipped here.
+The summary helper also writes `T_L2_matched.csv` and a descriptive report inside `captured_replay`. This table uses QP-relative norm differences and its own filtering. The DM-relative norm comparison uses the optional analysis below; the two tables have different references and acceptance populations. `T_L2_matched.csv` is not published at the output root. The reproduction wrapper produces tables and receipts with plotting disabled.
 
 ## Two optional analyses
 
 ### Paired interior-force subsets
 
-For the paired interior-force subsets, set `options.interior_table=true`. This additionally requires the original `independent_readback_audit.mat` and publishes `T_complete_paths_matched_interiors.csv` after checking its all-seven method physical-audit completion. This does not rerun that independent audit.
+For the paired interior-force subsets, set `options.interior_table=true`. This additionally requires the saved `independent_readback_audit.mat` and publishes `T_complete_paths_matched_interiors.csv` after checking its all-seven method physical-audit completion. This does not rerun that independent audit.
 
 ### Actual-tension L2 differences
 
-For the final actual-tension L2 difference, set `options.norm_statistics=true` and `options.inventory_file` to the original `FULL_DATA_INVENTORY.csv`. This is supported only for the original complete 30,965,760-row saved run:
+For the DM-relative actual-tension L2 difference, set `options.norm_statistics=true` and `options.inventory_file` to the published-run `FULL_DATA_INVENTORY.csv`. This is supported only for the complete 30,965,760-row published saved run:
 
 ```matlab
 opts = struct('norm_statistics',true,'inventory_file',inventoryFile);
 reproduce_saved_results(savedFullRunDir,newAnalysisDir,opts);
 ```
 
-The original archive is named `ACTA_full_raw_data.zip` (about 10.6 GB), supplied separately by the authors. Its recorded SHA-256 is `3e99e0ca71b8096354d51749400054dee03af5bb78a6a2ca37af415023afe933`. Extract it and use its `review_v11_full` directory as `savedFullRunDir`. The matching original inventory is included as [`provenance/FULL_DATA_INVENTORY.csv`](../provenance/FULL_DATA_INVENTORY.csv) at the package root. For example, set the inventory path before running the optional command:
+The published-run archive is named `ACTA_full_raw_data.zip` (about 10.6 GB), supplied separately by the authors. Its recorded SHA-256 is `3e99e0ca71b8096354d51749400054dee03af5bb78a6a2ca37af415023afe933`. Extract it and use its `review_v11_full` directory as `savedFullRunDir`. The matching data inventory is included as [`provenance/FULL_DATA_INVENTORY.csv`](../provenance/FULL_DATA_INVENTORY.csv) at the package root. For example, set the inventory path before running the optional command:
 
 ```matlab
 inventoryFile = fullfile(pwd,'provenance','FULL_DATA_INVENTORY.csv')
@@ -75,7 +75,7 @@ inventoryFile = fullfile(pwd,'provenance','FULL_DATA_INVENTORY.csv')
 
 No public data-download URL is available here.
 
-The optional norm postprocessor writes `newAnalysisDir/norm_analysis` and uses the original 24,433,774-row common unchanged-force starting cohort. It uses `delta = norm(T_method,2) - norm(T_DM,2)`, in N, from the actual returned tension vectors. It recomputes norms and physical checks, preserves signed differences and saves exact per-method valid/excluded masks. It needs the ten raw files above plus original `masks.mat`, `T_quality.csv`, `completion_receipt.json`, and these original `source_snapshot` files: `Compare_Review_v11.m`, `wt4_2024_minmax_v4.m`, `wt_pott_v2.m`, `wt_qp_bounded_v11.m` and `wt_gouttefarde_v2.m`. The inventory validates those original captured identities; these historical filenames must remain unchanged in the saved-run directory. They are not the renamed, documented copies delivered in [src/](../src/). No optimizer or tension distribution function is invoked.
+The optional norm postprocessor writes `newAnalysisDir/norm_analysis` and uses the 24,433,774-row common unchanged-force starting cohort. It uses `delta = norm(T_method,2) - norm(T_DM,2)`, in N, from the actual returned tension vectors. It recomputes norms and physical checks, preserves signed differences and saves exact per-method valid/excluded masks. It needs the ten raw files above plus saved `masks.mat`, `T_quality.csv`, `completion_receipt.json`, and these `source_snapshot` files from the data archive: `Compare_Review_v11.m`, `wt4_2024_minmax_v4.m`, `wt_pott_v2.m`, `wt_qp_bounded_v11.m` and `wt_gouttefarde_v2.m`. The data inventory validates those snapshot identities; use the archive filenames exactly as listed when checking the saved run. No optimizer or tension distribution function is invoked.
 
 It can also run separately without the general timing replay:
 
@@ -96,9 +96,9 @@ The measured full grid contains 64 x 64 poses in `[0,315]^2` mm, 21 force magnit
 
 Zero x/y axes are interior symmetry axes; only `x=315` or `y=315` is a frame edge.
 
-The original host used Intel Core i9-12900K hardware, 16 physical/24 logical processors, MATLAB R2024b Update 4 and eight process workers. Each worker completed 192 warmup boundary calls (eight repetitions of three representative requests across WEC plus seven methods/pipelines). Warmups are discarded; their internal solver iterations are not repetitions of the measured grid. The host-specific affinity mapping was applied and restored. See [`SETTINGS_AND_TIMING.txt`](SETTINGS_AND_TIMING.txt) for the recorded policy and numerical acceptance.
+The reported experiment uses Intel Core i9-12900K hardware, 16 physical/24 logical processors, MATLAB R2024b Update 4 and eight process workers. Each worker completed 192 warmup boundary calls (eight repetitions of three representative requests across WEC plus seven methods/pipelines). Warmups are discarded; their internal solver iterations are not repetitions of the measured grid. The host-specific affinity mapping was applied and restored. See [`SETTINGS_AND_TIMING.txt`](SETTINGS_AND_TIMING.txt) for the recorded policy and numerical acceptance.
 
-The captured loop took 5,843.591001 seconds (97.393 minutes), including parallel scheduling, independent post-checks and raw storage inside that loop, excluding pool startup, warmup and later analysis. This is the observed historical cost, not a runtime guarantee.
+The captured loop took 5,843.591001 seconds (97.393 minutes), including parallel scheduling, independent post-checks and raw storage inside that loop, excluding pool startup, warmup and later analysis. This is the measured cost on that host, not a runtime guarantee.
 
 The ten raw files occupy about 10.52 GB in their saved compressed representation. Saved replay makes real copies: allow about 12 GB additional free disk plus several GB of working RAM (roughly 5-7 GB for the full summary's arrays and quantile temporaries; this is an estimate, not a recorded peak). Optional norm analysis adds working memory and hashing/reading time but produces compact masks, not a full delta array. Small smoke runs use a tiny fraction of these storage/memory requirements.
 
@@ -112,7 +112,7 @@ Use sufficient headroom for potentially less-compressible v7.3 output (about 40 
 
 ## Important interpretation
 
-All per-method time fields are raw elapsed seconds; published table times are microseconds. Ratios of table medians are ratios of marginal medians, not medians of paired ratios. Observed maxima are not WCET guarantees. A single pass removes repeated-grid best-of selection; it does not eliminate internal Newton iterations or pre-measurement warmup. Shared-WEC tension distribution timing and complete raw-request pipeline timing have different boundaries and must not be interchanged. See [`SETTINGS_AND_TIMING.txt`](SETTINGS_AND_TIMING.txt) before using a timing claim.
+All per-method time fields are raw elapsed seconds; published table times are microseconds. Ratios of table medians are ratios of marginal medians, not medians of paired ratios. Observed maxima are not WCET guarantees. Each eligible public call is measured once. Internal Newton iterations and pre-measurement warmup are distinct from the number of timing observations. Shared-WEC tension distribution timing and complete raw-request pipeline timing have different boundaries and must not be interchanged. See [`SETTINGS_AND_TIMING.txt`](SETTINGS_AND_TIMING.txt) before using a timing claim.
 
 ## Function reference
 
@@ -126,8 +126,8 @@ Paths are disjoint and the output is fresh. `options` supports logical `interior
 
 ### `compute_norm_differences_saved(inputDir,outputDir,inventoryFile)`
 
-Optional full-run DM-relative analysis; explicit paths are recommended. Its returned receipt has `status='passed'` only after checking the original inventory and all physical mask/readback invariants. It writes three method rows with median/q2.5/q97.5/min/max in N, counts and exact masks. In its mask MAT, `candidate_mask` is N-by-1, `pair_valid_mask` and `exclusion_reason_bits` are N-by-3 in ICFM/bounded-QP/VTDA order. Native positive QP status, bound <=1e-9 N and raw-force 2-norm <=1e-8 N are required; signed differences never filter rows. Quantiles use Hyndman-Fan type 5, `h=N*p+0.5`, with interpolation and clamping.
+Optional full-run DM-relative analysis; explicit paths are recommended. Its returned receipt has `status='passed'` only after checking the published-run inventory and all physical mask/readback invariants. It writes three method rows with median/q2.5/q97.5/min/max in N, counts and exact masks. In its mask MAT, `candidate_mask` is N-by-1, `pair_valid_mask` and `exclusion_reason_bits` are N-by-3 in ICFM/bounded-QP/VTDA order. Native positive QP status, bound <=1e-9 N and raw-force 2-norm <=1e-8 N are required; signed differences never filter rows. Quantiles use Hyndman-Fan type 5, `h=N*p+0.5`, with interpolation and clamping.
 
 ### Captured helpers
 
-[captured/](captured/) is a private provenance dependency, not an additional public API. `compare_methods(config)` is the renamed measured harness delegated to by the capture wrapper. `summarize_results(folder,false)` consumes the complete N-row capture and returns tables/summary, recording `analysis_complete` separately. `analyze_interior_infeasible(folder)` returns two paired-error table rows after checking the existing seven-method independent audit. The summary's plotting branch is unused by the wrapper and its plot helper is not shipped; call the documented wrapper, which always passes `false` for plotting.
+[captured/](captured/) contains the helpers used by the documented wrappers. `compare_methods(config)` executes the measurement harness for the capture wrapper. `summarize_results(folder,false)` consumes the complete N-row capture and returns tables/summary, recording `analysis_complete` separately. `analyze_interior_infeasible(folder)` returns two paired-error table rows after checking the existing seven-method independent audit. Use the documented wrapper to run the summary with plotting disabled (`false`).

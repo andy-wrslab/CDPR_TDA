@@ -58,10 +58,10 @@ The first five methods receive a shared wrench-exertion-capability (WEC) target;
 | [Method sources](docs/METHOD_SOURCES.txt) | Comparison methods and their references |
 | [Validation](docs/VALIDATION.txt) | Tested commands, results, and scope of verification |
 | [`benchmark/`](benchmark/README.md) | Capture and saved-data reproduction instructions, settings, and costs |
-| [`provenance/`](provenance/) | Original/published source identities and function-name mapping |
-| [Changes](CHANGES.txt) · [Notices](NOTICES.txt) | Presentation changes, source attribution, and license information |
+| [`provenance/`](provenance/) | SHA-256 inventories for package source and published-run data |
+| [Notices](NOTICES.txt) | Source attribution and license information |
 
-Returned tensions follow the original anchor-column order. A finite result or a legacy status flag alone does not establish success; independently check equilibrium and tension bounds. WEC can change an infeasible request's magnitude or signed direction, some force lines have no target, and zero requests have a separate fallback. Read the [function reference](docs/FUNCTION_REFERENCE.txt) before supplying different inputs.
+Returned tensions follow the original anchor-column order. A finite result or a native status flag alone does not establish success; independently check equilibrium and tension bounds. WEC can change an infeasible request's magnitude or signed direction, some force lines have no target, and zero requests have a separate fallback. Read the [function reference](docs/FUNCTION_REFERENCE.txt) before supplying different inputs.
 
 ## Benchmark reproduction
 
@@ -80,16 +80,14 @@ Both output directories must be new. Worker startup can dominate this small capt
 
 ### Full experiment: substantial computational cost
 
-The full experiment has **30,965,760 requests** and eight recorded timing series. Its original capture loop took **5,843.6 seconds (about 97.4 minutes)** on eight workers of the reported i9-12900K system, excluding startup and later analysis.
+The full experiment has **30,965,760 requests** and eight recorded timing series. Its measured capture loop took **5,843.6 seconds (about 97.4 minutes)** on eight workers of the reported i9-12900K system, excluding startup and later analysis.
 
-- Original raw data: approximately **10.52 GB**.
+- Published raw data: approximately **10.52 GB**.
 - New full capture: conservatively allow **40 GB** of free disk space.
 - Independent saved-data replay: allow a further **12 GB** and several GB of working memory.
 
 These are resource estimates, not completion-time guarantees. Read the [full benchmark instructions](benchmark/README.md) before starting a full capture or reproducing the published results from the separately supplied data archive. The example and default smoke command never start a full run. Large raw data and generated results are excluded from this repository and package.
 
-## Validation and numerical preservation
+## Validation
 
-The numerical statements are preserved after the documented function-name mapping. Public function names have no revision suffixes; solver settings and timing boundaries are unchanged. Setup and validation wrappers operate outside the measured routines.
-
-The clean-extraction examples, 192-request smoke capture, and saved-data replay passed. See [validation details](docs/VALIDATION.txt) for the historical full-data checks and the limit on full-run testing, and [changes](CHANGES.txt) for the documented presentation updates.
+The clean-extraction examples, 192-request smoke capture, and saved-data replay pass the documented checks. Setup and independent physical checks run outside the per-method timing boundaries. See [validation details](docs/VALIDATION.txt) for tested commands, numerical results, and the scope of full-data verification.

@@ -5,11 +5,11 @@ function WDM=wt_direct(WDM,P,F)
 %   the accompanying manuscript. WEC is a separate function; this routine
 %   does not change F or call an iterative optimizer.
 %
-% INPUTS (the reviewed planar four-cable setup)
+% INPUTS (the benchmark planar four-cable setup)
 %   WDM.param.M       2-by-4 anchor positions [mm], in fixed CCW cable order.
 %   WDM.param.lim_inf  4-by-1 lower tension bounds [N]; all equal and positive.
 %   WDM.param.lim_sup  4-by-1 upper tension bounds [N]; all equal, above lim_inf.
-%   WDM.param.TOLL     Numerical zero/geometric cutoff (reviewed value 1e-14).
+%   WDM.param.TOLL     Numerical zero/geometric cutoff (benchmark value 1e-14).
 %   WDM.verbose       Logical scalar; use false for numerical calls.
 %   P                 2-by-1 known platform position [mm].
 %   F                 2-by-1 requested Cartesian force [N].
@@ -19,7 +19,7 @@ function WDM=wt_direct(WDM,P,F)
 %
 % Use the fixed CCW anchor order and a position strictly inside the convex
 % anchor frame. Cyclic relabeling is not a general sort for unordered anchors
-% or exterior/degenerate poses. The legacy routine reads the first lower/
+% or exterior/degenerate poses. The routine reads the first lower/
 % upper bound as a common scalar; unequal cable bounds are unsupported here.
 %
 % OUTPUTS (added to the returned WDM)
@@ -78,7 +78,7 @@ else
     if Th(imax)<Th(4), imax=4; end
     cable = [imax; sig(imax+1); sig(imax+2); sig(imax+3)];
 
-    % Algorithm 1, lines 5-6; current Eqs. (6)-(7): analytic tauP and N.
+    % Algorithm 1, lines 5-6; Eqs. (6)-(7): analytic tauP and N.
     s21 = sin(Th(cable(2))-Th(cable(1)));
     TauP = zeros(4,1);
     TauP(cable(1)) =  nr/s21*sin(Th(cable(2)));
@@ -89,7 +89,7 @@ else
                    s21                              0;
                    0                                s21 ];
 
-    % Current Eq. (13): form full Pm=N' * N and q; only scalar minima are solved.
+    % Eq. (13): form full Pm=N' * N and q; only scalar minima are solved.
     q  = N'*(ones(4,1)+TauP);   % q = N'(tauP + 1)
     Pm = N'*N;                  % P = N'N
 
@@ -175,7 +175,7 @@ end
 end
 
 %##########################################################################
-% internal functions
+% Local helper functions
 %##########################################################################
 function out=sig(t)        % cyclic cable index in 1..4
 out = mod(t-1,4)+1;

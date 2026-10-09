@@ -7,7 +7,7 @@ Six tension distribution functions use OUT = name(WDM,P,F). WEC uses
 inside the seven source files. Bounded QP requires Optimization Toolbox;
 the other six numerical functions use base MATLAB.
 
-The reviewed geometry has two translational force coordinates and four cables.
+The benchmark geometry has two translational force coordinates and four cables.
 WDM.param.M is 2-by-4, with columns in fixed counterclockwise (CCW) order:
   [-315  315  315 -315; -315 -315 315 315] mm.
 P is a known 2-by-1 position in mm, and F is a 2-by-1 requested force in N.
@@ -21,10 +21,10 @@ Supply fresh WDM.param.lim_inf=3.8*ones(4,1) and lim_sup=25*ones(4,1), in N,
 WDM.param.TOLL=1e-14, WDM.param.TOLL_WEC=1e-9, and WDM.verbose=false.
 The common contract uses equal positive lower bounds and equal upper bounds.
 Direct, ICFM branching and WEC read the first bound as a common scalar;
-do not use their legacy interfaces to infer support for unequal bounds.
+do not use their interfaces to infer support for unequal bounds.
 X-ACTA additionally validates general n-by-m full-row-rank geometry and scalar
 or per-cable bounds, but that broader interface was not the planar comparison.
-TOLL is a legacy numerical zero/geometric cutoff, not the common physical
+TOLL is a numerical zero/geometric cutoff, not the common physical
 acceptance tolerance. M and P must use the same length unit. Changing force or
 tension units requires reconsidering dimensional options such as delta and
 TOLL_WEC; do not relabel the numbers alone.
@@ -41,7 +41,7 @@ Common outputs and physical checks
 A produced tension vector T is 4-by-1 in the original anchor-column order, in N.
 normT is its Euclidean norm; errT is norm(W*T-F,2), both in N. These diagnostic
 fields are produced by the numerical function and are part of its public-call
-work. They are not universal success certificates. Legacy routines may error,
+work. They are not universal success certificates. Some routines may error,
 produce nonfinite values, or return without new output fields on difficult input.
 Check T exists, is numeric/real/finite with four elements, then independently test
   max([0;lim_inf-T;T-lim_sup]) <= 1e-9 N,
@@ -49,7 +49,7 @@ Check T exists, is numeric/real/finite with four elements, then independently te
 Require positive exitflag for bounded QP, ACTA and X-ACTA. For complete paths also
 report norm(W*T-F_raw,2), since a WEC-adjusted target or EAC slack can differ from
 the original request. A successful bounded output and exact raw-force reproduction
-are distinct results. scale_dir is a legacy, method-specific field; it has no
+are distinct results. scale_dir is a method-specific field; it has no
 single cross-method meaning. Fallback use is not itself an optimality certificate.
 
 Direct: wt_direct
@@ -84,7 +84,7 @@ Bounded QP: wt_qp_bounded
 Solves min 0.5*T'*T with equality W*T=F and both tension bounds. It always keeps
 both bounds, including on infeasible targets. quadprog uses interior-point-convex,
 ConstraintTolerance=1e-10, OptimalityTolerance=1e-10, MaxIterations=200, Display=off,
-and x0=[]. Other options are the installed-version defaults. The reviewed version
+and x0=[]. Other options are the installed-version defaults. The benchmark environment
 was MATLAB R2024b Update 4, Optimization Toolbox 24.2. Different library versions
 can alter iteration counts and numerical results.
 Native exitflag and iter are returned; T may be empty or a last iterate on failure.
