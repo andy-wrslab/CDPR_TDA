@@ -68,29 +68,29 @@ for k=1:numel(manifest.solver_functions)
 end
 oldPath=path;oldFolder=pwd;cleanup=onCleanup(@()restore_environment(oldPath,oldFolder)); %#ok<NASGU>
 addpath(here,'-begin');addpath(captured,'-begin');addpath(guardDir,'-begin');cd(guardDir);
-clear summarize_Review_v11 plot_Review_v11 analyze_interior_infeasible_v11
+clear summarize_results plot_results analyze_interior_infeasible
 clear(manifest.solver_functions{:});rehash;
 for k=1:numel(manifest.solver_functions)
     fn=manifest.solver_functions{k};assert(strcmpi(which(fn),fullfile(guardDir,[fn '.m'])));
 end
-summary=summarize_Review_v11(replay,false);
+summary=summarize_results(replay,false);
 publish={'T_domain.csv','T_timing.csv','T_quality.csv','T_postwec_components.csv', ...
     'T_iterative_domains.csv','T_wec_behavior.csv','T_pipeline_parity.csv', ...
     'T_force_approximation.csv','T_complete_paths_matched.csv'};
 if options.interior_table
-    analyze_interior_infeasible_v11(replay);
+    analyze_interior_infeasible(replay);
     publish=[publish,{'T_complete_paths_matched_interiors.csv'}];
 end
 for k=1:numel(publish),copyfile(fullfile(replay,publish{k}),fullfile(outputDir,publish{k}));end
 if options.norm_statistics
-    compute_norm_differences_saved_v11(inputDir,fullfile(outputDir,'norm_analysis'),options.inventory_file);
+    compute_norm_differences_saved(inputDir,fullfile(outputDir,'norm_analysis'),options.inventory_file);
 end
 for k=1:numel(files)
     records(k).sha256_after=sha256(fullfile(inputDir,files{k}));
     assert(strcmp(records(k).sha256_before,records(k).sha256_after),'Original input changed: %s',files{k});
 end
-sources={'reproduce_saved_results.m','captured/summarize_Review_v11.m', ...
-    'captured/analyze_interior_infeasible_v11.m'};
+sources={'reproduce_saved_results.m','captured/summarize_results.m', ...
+    'captured/analyze_interior_infeasible.m'};
 sourceHashes=repmat(struct('file','','sha256',''),numel(sources),1);
 for k=1:numel(sources),sourceHashes(k)=struct('file',sources{k},'sha256',sha256(fullfile(here,sources{k})));end
 result=struct('status','passed','ninputs',manifest.ninputs,'input_files_unchanged',true, ...

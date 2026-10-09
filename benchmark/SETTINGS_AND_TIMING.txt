@@ -1,12 +1,15 @@
-MEASURED V11 SETTINGS AND TIMING BOUNDARIES
+MEASURED SETTINGS AND TIMING BOUNDARIES
 
 Captured source authority
 
-captured/Compare_Review_v11.m is byte-identical to the completed full run:
+captured/compare_methods.m preserves the completed full run's numerical
+operations and timing boundaries after the documented function-name mapping
+and metadata-only log/default-directory renames. The original harness hash was
 SHA-256 05d5133cc5e8f38b0f97a12806d8784335f09597922ead03961edc44f8fb9dc7.
-The numerical package src/ files preserve measured executable statements;
-their public comments explain interfaces and limitations. Every new capture
-snapshots the exact staged sources and records their hashes in its manifest.
+The numerical src/ files likewise preserve numerical statements after the name
+mapping. Their comments explain interfaces and limitations. Original/current
+source identities are in provenance/SOURCE_MANIFEST.csv at the package root.
+Every new capture snapshots the staged sources and records their hashes.
 
 Common geometry and force grid
 
@@ -22,7 +25,7 @@ of the seven method/pipeline batches rotates between chunks.
 
 One observation per attempted public call
 
-WEC alone: fresh WEC_v5 public call, including its 16 box-image vertices,
+WEC alone: fresh WEC public call, including its 16 box-image vertices,
 convex hull and line/zero-force policy. This is a separate measured series.
 
 DM, ICFM, bounded QP, VTDA-L2 and ACTA post-WEC: each receives the identical

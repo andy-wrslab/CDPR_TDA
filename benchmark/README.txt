@@ -3,12 +3,13 @@ BENCHMARK CAPTURE AND SAVED-DATA REPRODUCTION
 This folder provides two distinct entry points. run_benchmark makes new timing
 observations; reproduce_saved_results only analyzes an existing saved capture.
 The default capture is a small 192-input smoke check, not the full experiment.
-The captured measured harness is preserved byte for byte in captured/.
-The summary helper has one disclosed metadata-only edit removing an unused
-plot-source dependency; all calculations are unchanged. The separate interior
-analysis helper is byte-identical. The wrapper stages the harness beside copies
-of the seven package src/ functions so its existing source-resolution checks
-continue to work. No executable timing boundary or numerical setting is edited.
+The measured harness is supplied in captured/ with revision suffixes removed
+from function names and their references. Generated log/default-directory names
+were also updated. The summary helper omits an unused plot-source dependency;
+all numerical calculations, settings and timing boundaries are unchanged. The
+wrapper stages the harness beside copies of the seven package src/ functions
+so its source-resolution checks continue to work. Source identities and the
+original-to-current name mapping are in provenance/SOURCE_MANIFEST.csv.
 
 Quick test from the extracted package root
 
@@ -56,7 +57,7 @@ icfm_postwec.mat, qp_postwec.mat, vtda_postwec.mat, acta_postwec.mat,
 xacta_raw.mat and wecdm_raw.mat. The measured series must be complete.
 The wrapper hashes every required file before copying, verifies each physical
 copy, then checks the original again after analysis. It places the copies
-and exact captured-helper outputs under newAnalysisDir/captured_replay.
+and captured-helper outputs under newAnalysisDir/captured_replay.
 Fail-fast stubs shadow all seven public solver functions during replay.
 No timing observation is recomputed or replaced, and attempted failures and
 observed long tails stay in their original timing populations.
@@ -69,14 +70,15 @@ records input identities, source hashes, options and successful completion.
 These hashes establish which inputs were replayed; without the original
 inventory they do not independently authenticate a downloaded historical run.
 
-The exact captured helper also writes T_L2_matched.csv and a descriptive
+The captured summary helper also writes T_L2_matched.csv and a descriptive
 report inside captured_replay. This is the historical QP-relative analysis
 with different filtering, NOT the final DM-relative norm comparison. It is
 not published at the output root. The wrapper never generates the old captured
 diagnostic plots, and their plotting source is not shipped. The summary's
 unconditional provenance-source list was shortened by one filename so it can
 run with plotting disabled; its numeric calculations are unchanged. The
-original/new hashes and exact one-line diff are in ANALYSIS_METADATA_CHANGE.txt.
+source identities and metadata edits are in ANALYSIS_METADATA_CHANGE.txt and
+provenance/SOURCE_MANIFEST.csv at the package root.
 No generated historical figures, run logs or rebuttal text are shipped here.
 
 Two optional analyses
@@ -110,12 +112,14 @@ differences and saves exact per-method valid/excluded masks. It needs the ten
 raw files above plus original masks.mat, T_quality.csv, completion_receipt.json,
 and these original source_snapshot files: Compare_Review_v11.m,
 wt4_2024_minmax_v4.m, wt_pott_v2.m, wt_qp_bounded_v11.m and wt_gouttefarde_v2.m.
-The inventory validates those original captured identities, not the package's
-comment-documented copies. No optimizer or tension distribution function is invoked.
+The inventory validates those original captured identities; these historical
+filenames must remain unchanged in the saved-run directory. They are not the
+renamed, documented copies delivered in src/. No optimizer or tension
+distribution function is invoked.
 
 It can also run separately without the general timing replay:
 
-compute_norm_differences_saved_v11(savedFullRunDir,newNormDir,inventoryFile);
+compute_norm_differences_saved(savedFullRunDir,newNormDir,inventoryFile);
 
 Full-run dimensions, resources and cost
 
@@ -183,7 +187,7 @@ captures, missing inputs, altered hashes or helper failures. It does not prove
 mathematical correctness independently of the saved checks; optional norm
 analysis does independently reconstruct geometry and per-pair acceptance.
 
-compute_norm_differences_saved_v11(inputDir,outputDir,inventoryFile): optional
+compute_norm_differences_saved(inputDir,outputDir,inventoryFile): optional
 full-run DM-relative analysis; explicit paths are recommended. Its returned
 receipt has status='passed' only after checking the original inventory and
 all physical mask/readback invariants. It writes three method rows with
@@ -194,10 +198,10 @@ raw-force 2-norm <=1e-8 N are required; signed differences never filter rows.
 Quantiles use Hyndman-Fan type 5, h=N*p+0.5, with interpolation and clamping.
 
 captured/ is a private provenance dependency, not an additional public API.
-Compare_Review_v11(config) is the exact measured harness delegated to by the
-capture wrapper. summarize_Review_v11(folder,false) consumes the complete N-row
+compare_methods(config) is the renamed measured harness delegated to by the
+capture wrapper. summarize_results(folder,false) consumes the complete N-row
 capture and returns tables/summary, recording analysis_complete separately.
-analyze_interior_infeasible_v11(folder) returns two paired-error table rows
+analyze_interior_infeasible(folder) returns two paired-error table rows
 after checking the existing seven-method independent audit. The summary's
-unreachable plotting branch is preserved, but its plot helper is not shipped;
+plotting branch is unused by the wrapper and its plot helper is not shipped;
 call the documented wrapper, which always passes false for plotting.

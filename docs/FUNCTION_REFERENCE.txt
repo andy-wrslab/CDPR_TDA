@@ -3,7 +3,7 @@ FUNCTION REFERENCE
 Shared calling convention
 
 Six tension distribution functions use OUT = name(WDM,P,F). WEC uses
-[F_NEW,IS_SCALED] = WEC_v5(WDM,P,F). All custom helpers are local functions
+[F_NEW,IS_SCALED] = WEC(WDM,P,F). All custom helpers are local functions
 inside the seven source files. Bounded QP requires Optimization Toolbox;
 the other six numerical functions use base MATLAB.
 
@@ -52,7 +52,7 @@ the original request. A successful bounded output and exact raw-force reproducti
 are distinct results. scale_dir is a legacy, method-specific field; it has no
 single cross-method meaning. Fallback use is not itself an optimality certificate.
 
-Direct: wt4_2024_minmax_v4
+Direct: wt_direct
 
 Minimizes actual-tension L2 through the manuscript's analytic particular solution,
 null basis, configuration selection and at most two clipped scalar minima.
@@ -69,7 +69,7 @@ calculation includes a 2-by-2 solve and two extra atan2 evaluations. Keep
 verbose=false. Case numbers, status flags and iteration counts are dimensionless.
 There are no iterative stopping options. Interval consistency uses 1e-12.
 
-ICFM: wt_pott_v2
+ICFM: wt_pott
 
 Projects the tension midpoint using pinv, then clamps/removes violating cables
 in at most three nested steps. Lower-bound tests precede upper-bound tests.
@@ -79,7 +79,7 @@ to reproduce F. Additional outputs: active=(T>lim_inf), cable_n counts relative
 lower-bound differences above 1e-6, case=NaN, and param.M_eff copies M.
 This implemented procedure is not a general L2-optimality certificate.
 
-Bounded QP: wt_qp_bounded_v11
+Bounded QP: wt_qp_bounded
 
 Solves min 0.5*T'*T with equality W*T=F and both tension bounds. It always keeps
 both bounds, including on infeasible targets. quadprog uses interior-point-convex,
@@ -93,7 +93,7 @@ NaN. primal_resid is the force infinity norm [N]; bound_violation is in N.
 scale_dir=0 requires positive exitflag plus bound<=1e-9 N and force<=1e-8 N;
 otherwise -1. case=NaN. Errors from quadprog are not hidden by this routine.
 
-VTDA-L2: wt_gouttefarde_v2
+VTDA-L2: wt_gouttefarde
 
 Computes null(W), an explicit two-dimensional generalized inverse and polygon
 vertex/edge tests. The walk processes at most 100 visits and returns before
@@ -175,7 +175,7 @@ Flags: 1 convergence, 0 budget, -1 rank/factorization, -2 nonfinite state,
 scale_dir is 0 for final flag 1, otherwise -1; case=NaN. Native convergence can
 coexist with nonzero original-force error because EAC deliberately allows slack.
 
-WEC: WEC_v5
+WEC: WEC
 
 Builds the convex hull of 16 box-vertex forces on every call. For nonzero F,
 adjustment is along the signed force line, with TOLL_WEC inward margin. This can

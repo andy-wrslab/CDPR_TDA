@@ -1,6 +1,6 @@
-function [F_new, is_scaled] = WEC_v5(WDM,P,F)
-% WEC_V5 Adjust a requested force using wrench exertion capability.
-%   [F_NEW,IS_SCALED] = WEC_v5(WDM,P,F) maps the 16 tension-box vertices
+function [F_new, is_scaled] = WEC(WDM,P,F)
+% WEC Adjust a requested force using wrench exertion capability.
+%   [F_NEW,IS_SCALED] = WEC(WDM,P,F) maps the 16 tension-box vertices
 %   into force space and constructs their convex hull. For nonzero F it
 %   intersects the SIGNED force line with that polygon and adjusts the
 %   force by the inward TOLL_WEC margin when needed.

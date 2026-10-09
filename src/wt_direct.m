@@ -1,6 +1,6 @@
-function WDM=wt4_2024_minmax_v4(WDM,P,F)
-% WT4_2024_MINMAX_V4 Direct L2-optimal tension distribution.
-%   OUT = wt4_2024_minmax_v4(WDM,P,F) computes a candidate with minimum
+function WDM=wt_direct(WDM,P,F)
+% WT_DIRECT Direct L2-optimal tension distribution.
+%   OUT = wt_direct(WDM,P,F) computes a candidate with minimum
 %   actual-tension norm for the four-cable geometry and feasible target of
 %   the accompanying manuscript. WEC is a separate function; this routine
 %   does not change F or call an iterative optimizer.

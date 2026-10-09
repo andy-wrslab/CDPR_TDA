@@ -1,20 +1,415 @@
-ANALYSIS SOURCE METADATA CHANGE
+SOURCE NAMES AND ANALYSIS METADATA CHANGES
 
-The measured harness and all numeric analysis expressions are preserved.
-The public saved-data wrapper always calls the summary with make_plots=false.
-Only the unused plot filename was removed from the summary provenance list,
-allowing the obsolete plotting helper to be omitted from this package.
+Public source filenames and MATLAB entry points no longer carry revision
+suffixes. The old/current mapping and original/current SHA-256 hashes are
+recorded in provenance/SOURCE_MANIFEST.csv. That file also records the previous
+reviewer-package hashes and non-comment-line hashes before and after renaming.
 
-Original captured summarize_Review_v11.m SHA-256:
+The original measured numerical statements, solver settings and timer boundaries
+are preserved after applying this identifier mapping. No compatibility wrappers
+or extra calls were inserted into a measured path. Diagnostic namespaces and
+source snapshot filenames follow the new function names. The harness default
+directory prefix and descriptive capture/affinity messages were also simplified.
+Reported timings remain the original observations; new test timings are separate.
+
+Historical source_snapshot filenames in the norm-analysis input checklist and
+FULL_DATA_INVENTORY.csv are intentionally retained. They identify immutable saved
+inputs, not the current public functions. The replay guards still read solver
+names from each input manifest, so historical captures remain readable.
+
+Existing presentation changes, before this rename:
+- Numerical-function edits were full-line comments and blank lines only.
+- Summary source-snapshot list omitted the unused historical plot helper.
+  The wrapper still disables plotting; no plot helper is distributed.
+- Norm-analysis relative paths were resolved against MATLAB's Current Folder.
+  All norm calculations and acceptance masks were unchanged.
+The renamed harness help example explicitly disables the omitted plotting path.
+
+Original summary SHA-256:
 002e3692edee15a63cba6acf0ad82c3976fd562209042c20fb757c3fc4ff5355
-Package summarize_Review_v11.m SHA-256:
-fde2dd11bb0729fd787c392ceb96a18684871ef98ed237337bf4aa06ce09387d
+Before renaming, its sole logical metadata edit was:
+-names={'summarize_Review_v11.m','plot_Review_v11.m'};
++names={'summarize_Review_v11.m'};
 
-Exact logical one-line diff (line endings may be normalized by the editor):
---- original/summarize_Review_v11.m
-+++ package/captured/summarize_Review_v11.m
-@@ -276,3 +276,3 @@
+Exact non-comment-line differences for this rename are listed below. Full-line
+help comments use the new names as well. Line-ending style is not numerical.
+
+--- previous-package/benchmark/captured/analyze_interior_infeasible_v11.m
++++ package/benchmark/captured/analyze_interior_infeasible.m
+@@ -1,4 +1,4 @@
+-function report=analyze_interior_infeasible_v11(folder)
++function report=analyze_interior_infeasible(folder)
+ manifest_file=fullfile(folder,'manifest.mat');
+ s=load(manifest_file,'manifest');m=s.manifest;
+ assert(any(strcmp(m.status,{'raw_complete','complete'})),'Raw capture is incomplete.');
+--- previous-package/benchmark/captured/Compare_Review_v11.m
++++ package/benchmark/captured/compare_methods.m
+@@ -1,10 +1,10 @@
+-function result = Compare_Review_v11(config)
++function result = compare_methods(config)
+ if nargin<1,config=struct();end
+ if ischar(config)||isstring(config),config=struct('profile',char(config));end
+ config=defaults(config);here=fileparts(mfilename('fullpath'));
+-if isempty(config.outdir),config.outdir=fullfile(here,'reviewer_xacta','results',['review_v11_' config.profile]);end
++if isempty(config.outdir),config.outdir=fullfile(here,'reviewer_xacta','results',['review_' config.profile]);end
+ assert(~exist(fullfile(config.outdir,'manifest.mat'),'file'), ...
+-    'Compare_Review_v11:ExistingRun','Choose a fresh output folder: %s',config.outdir);
++    'compare_methods:ExistingRun','Choose a fresh output folder: %s',config.outdir);
+ if ~exist(config.outdir,'dir'),mkdir(config.outdir);end
+ old_path=path;path_cleanup=onCleanup(@()path(old_path)); %#ok<NASGU>
+ addpath(here);
+@@ -14,11 +14,11 @@
+ methods={'DM post-WEC','ICFM post-WEC','Bounded QP post-WEC','VTDA-L2 post-WEC', ...
+     'ACTA post-WEC','X-ACTA raw','WEC + DM raw'};
+ files={'dm_postwec','icfm_postwec','qp_postwec','vtda_postwec','acta_postwec','xacta_raw','wecdm_raw'};
+-functions={'wt4_2024_minmax_v4','wt_pott_v2','wt_qp_bounded_v11', ...
+-    'wt_gouttefarde_v2','wt_acta','wt_xacta','WEC_v5'};
++functions={'wt_direct','wt_pott','wt_qp_bounded', ...
++    'wt_gouttefarde','wt_acta','wt_xacta','WEC'};
+ for k=1:numel(functions)
+     assert(strcmpi(which(functions{k}),fullfile(here,[functions{k} '.m'])), ...
+-        'Compare_Review_v11:ShadowedSource','Unexpected source resolution: %s',functions{k});
++        'compare_methods:ShadowedSource','Unexpected source resolution: %s',functions{k});
+ end
+ WDM.param.M=[-315 315 315 -315;-315 -315 315 315];
+ WDM.param.TOLL=1e-14;WDM.param.TOLL_WEC=1e-9;
+@@ -41,11 +41,11 @@
+     'chunk_order',chunk_order,'method_order',zeros(nchunks,7), ...
+     'started_at',datestr(now,30),'status','incomplete','matlab_version',version, ...
+     'toolbox_versions',ver,'source_snapshot',snapshot_sources(here,config.outdir,functions), ...
+-    'input_order','pose varies fastest; then force magnitude and angle as original v8', ...
++    'input_order','pose varies fastest; then force magnitude and angle as in the recorded input grid', ...
+     'frame_interior','x<315 and y<315; zero axes are interior symmetry axes', ...
+     'timing_policy','one raw wall-clock observation per attempted public call; observed maxima, not WCET', ...
+-    'shared_wec_policy','fresh WEC_v5; nonfinite or independently outside force skips all five allocations; no substitute', ...
+-    'pipeline_policy','fresh WEC_v5 plus finite check plus DM; physical checks after timer', ...
++    'shared_wec_policy','fresh WEC; nonfinite or independently outside force skips all five allocations; no substitute', ...
++    'pipeline_policy','fresh WEC plus finite check plus DM; physical checks after timer', ...
+     'output_code_legend','1 finite; -1 exception; -2 malformed; -3 nonfinite; -4 shared-WEC skip; -5 invalid pipeline WEC; 0 pending', ...
+     'acceptance_bits',{{'finite','bounds','convergence','successful','exact_target','exact_raw'}}, ...
+     'wec_code_legend','1 finite and independently allowed; -1 exception; -2 malformed; -3 nonfinite; -4 finite outside', ...
+@@ -59,7 +59,7 @@
+ pool=gcp('nocreate');
+ if isempty(pool),pool=parpool('Processes',config.workers);end
+ assert(~isa(pool,'parallel.ThreadPool')&&pool.NumWorkers==config.workers, ...
+-    'Compare_Review_v11:PoolMismatch','Use the requested number of process workers.');
++    'compare_methods:PoolMismatch','Use the requested number of process workers.');
+ worker_cleanup=onCleanup(@()restore_worker_warnings(pool)); %#ok<NASGU>
+ fetchOutputs(parfevalOnAll(pool,@worker_warning_state,1,'capture',here));
+ fetchOutputs(parfevalOnAll(pool,@verify_worker_solvers,1,here,functions));
+@@ -73,7 +73,7 @@
+ initialize_files(config.outdir,files,n,nchunks);
+ manifest.measured_attempts=zeros(1,8);manifest.pipeline_shared_wec_mismatches=0;
+ save(fullfile(config.outdir,'manifest.mat'),'manifest','-append');
+-fprintf('Review v11: %s, %d poses x %d forces = %d inputs; %d chunks; one measured call/series.\n', ...
++fprintf('Review: %s, %d poses x %d forces = %d inputs; %d chunks; one measured call/series.\n', ...
+     config.profile,nposes,nforces,n,nchunks);
+ fprintf('Strict frame interior includes zero axes; boundary is x=315 or y=315.\n');
+ fprintf('Shared WEC invalid -> all five dependent calls skipped; X-ACTA still receives raw F.\n');
+@@ -155,16 +155,16 @@
+     fprintf('Chunk %d/%d complete, inputs %d:%d; WEC allowed %d/%d; %.1f min.\n', ...
+         block,nchunks,first,last,sum(allowed),count,manifest.capture_seconds/60);
+ end
+-assert(manifest.pipeline_shared_wec_mismatches==0,'Compare_Review_v11:WECDifference', ...
++assert(manifest.pipeline_shared_wec_mismatches==0,'compare_methods:WECDifference', ...
+     'Directly recomputed pipeline WEC differed from shared WEC; inspect raw pipeline_Fw.');
+-assert(verify_sources(manifest.source_snapshot),'Compare_Review_v11:SourceChanged', ...
++assert(verify_sources(manifest.source_snapshot),'compare_methods:SourceChanged', ...
+     'Production source changed during measurement.');
+ manifest.status='raw_complete';manifest.finished_at=datestr(now,30);
+ manifest.capture_seconds=toc(timer_run);manifest.source_snapshot_unchanged=true;
+ save(fullfile(config.outdir,'manifest.mat'),'manifest','-append');
+ result=manifest;
+ fprintf('All raw capture complete: %.1f min; %s\n',manifest.capture_seconds/60,config.outdir);
+-if config.analyze,result=summarize_Review_v11(config.outdir);end
++if config.analyze,result=summarize_results(config.outdir);end
+ end
+ function c=defaults(c)
+ if ~isfield(c,'profile'),c.profile='smoke';end
+@@ -217,7 +217,7 @@
+ function [fw,scaled,elapsed,code]=timed_wec(WDM,p,f)
+ fw=[NaN;NaN];scaled=int8(-1);code=int8(1);timer=[];
+ try
+-    timer=tic;[candidate,native]=WEC_v5(WDM,p,f);elapsed=toc(timer);
++    timer=tic;[candidate,native]=WEC(WDM,p,f);elapsed=toc(timer);
+     if ~isnumeric(candidate)||~isreal(candidate)||numel(candidate)~=2
+         code=int8(-2);
+     else
+@@ -233,17 +233,17 @@
+ out=struct();fw=[NaN;NaN];timer=[];code=int8(1);
+ try
+     switch m
+-        case 1,timer=tic;out=wt4_2024_minmax_v4(WDM,p,f);elapsed=toc(timer);
+-        case 2,timer=tic;out=wt_pott_v2(WDM,p,f);elapsed=toc(timer);
+-        case 3,timer=tic;out=wt_qp_bounded_v11(WDM,p,f);elapsed=toc(timer);
+-        case 4,timer=tic;out=wt_gouttefarde_v2(WDM,p,f);elapsed=toc(timer);
++        case 1,timer=tic;out=wt_direct(WDM,p,f);elapsed=toc(timer);
++        case 2,timer=tic;out=wt_pott(WDM,p,f);elapsed=toc(timer);
++        case 3,timer=tic;out=wt_qp_bounded(WDM,p,f);elapsed=toc(timer);
++        case 4,timer=tic;out=wt_gouttefarde(WDM,p,f);elapsed=toc(timer);
+         case 5,timer=tic;out=wt_acta(WDM,p,f);elapsed=toc(timer);
+         case 6,timer=tic;out=wt_xacta(WDM,p,f);elapsed=toc(timer);
+         case 7
+             timer=tic;
+-            fw=WEC_v5(WDM,p,f);
++            fw=WEC(WDM,p,f);
+             if isnumeric(fw)&&isreal(fw)&&numel(fw)==2&&all(isfinite(fw(:)))
+-                fw=fw(:);out=wt4_2024_minmax_v4(WDM,p,fw);
++                fw=fw(:);out=wt_direct(WDM,p,fw);
+             else
+                 code=int8(-5);
+                 if ~isnumeric(fw)||~isreal(fw)||numel(fw)~=2,fw=[NaN;NaN];else,fw=fw(:);end
+@@ -363,12 +363,12 @@
+ end
+ function state = pin_workers(pool,enabled)
+ state=struct('requested',logical(enabled),'applied',false, ...
+-    'reason','disabled or hardware/pool does not match v8', ...
++    'reason','disabled or hardware/pool does not match the recorded configuration', ...
+     'worker_pids',[],'worker_affinity_masks',[],'client_affinity_mask',[], ...
+     'original_worker_masks',[],'original_client_mask',[]);
+ if ~(enabled && ispc && feature('numcores')==16 && ...
+         str2double(getenv('NUMBER_OF_PROCESSORS'))==24 && pool.NumWorkers<=8)
+-    fprintf('P-core pinning skipped (disabled or hardware/pool does not match v8).\n');
++    fprintf('P-core pinning skipped (disabled or hardware/pool does not match the recorded configuration).\n');
+     return
+ end
+ state.worker_pids=fetchOutputs(parfevalOnAll(pool,@feature,1,'getpid'));
+@@ -401,14 +401,14 @@
+         process=System.Diagnostics.Process.GetProcessById(int32(state.worker_pids(k)));
+         process.ProcessorAffinity=System.IntPtr(state.original_worker_masks(k));
+     catch err
+-        warning('Compare_Review_v11:RestoreAffinity','Could not restore worker affinity: %s',err.message);
++        warning('compare_methods:RestoreAffinity','Could not restore worker affinity: %s',err.message);
+     end
+ end
+ try
+     client=System.Diagnostics.Process.GetCurrentProcess();
+     client.ProcessorAffinity=System.IntPtr(state.original_client_mask);
+ catch err
+-    warning('Compare_Review_v11:RestoreAffinity','Could not restore client affinity: %s',err.message);
++    warning('compare_methods:RestoreAffinity','Could not restore client affinity: %s',err.message);
+ end
+ end
+ function result = worker_warning_state(action,here)
+@@ -424,7 +424,7 @@
+ function result=verify_worker_solvers(here,functions)
+ for k=1:numel(functions)
+     assert(strcmpi(which(functions{k}),fullfile(here,[functions{k} '.m'])), ...
+-        'Compare_Review_v11:WorkerSolverPath','Worker has a shadowed solver: %s',functions{k});
++        'compare_methods:WorkerSolverPath','Worker has a shadowed solver: %s',functions{k});
+ end
+ result=true;
+ end
+@@ -432,7 +432,7 @@
+ try
+     fetchOutputs(parfevalOnAll(pool,@worker_warning_state,1,'restore'));
+ catch err
+-    warning('Compare_Review_v11:RestoreWarnings','Could not restore worker warnings: %s',err.message);
++    warning('compare_methods:RestoreWarnings','Could not restore worker warnings: %s',err.message);
+ end
+ end
+ function restore_diary(state,filename)
+@@ -441,7 +441,7 @@
+ if ~strcmpi(state,'on'),diary('off');end
+ end
+ function records=snapshot_sources(here,outdir,functions)
+-names=[{'Compare_Review_v11'},functions];
++names=[{'compare_methods'},functions];
+ records=repmat(struct('original_path','','snapshot_path','','sha256',''),numel(names),1);
+ folder=fullfile(outdir,'source_snapshot');if ~exist(folder,'dir'),mkdir(folder);end
+ for k=1:numel(names)
+--- previous-package/benchmark/captured/summarize_Review_v11.m
++++ package/benchmark/captured/summarize_results.m
+@@ -1,4 +1,4 @@
+-function summary = summarize_Review_v11(folder,make_plots)
++function summary = summarize_results(folder,make_plots)
+ if nargin<2,make_plots=true;end
+ analysis_started_at=datestr(now,30);analysis_timer=tic;
+ S=load(fullfile(folder,'manifest.mat'));manifest=S.manifest;WDM=S.WDM;
+@@ -120,7 +120,7 @@
+ for k=1:numel(names),writetable(summary.(names{k}),fullfile(folder,[names{k} '.csv']));end
+ save(fullfile(folder,'summary.mat'),'summary','-v7.3');
+ write_report(folder,summary);
+-if make_plots,plot_Review_v11(folder,summary);end
++if make_plots,plot_results(folder,summary);end
+ analysis_receipt=struct('status','analysis_complete','capture_status',manifest.status, ...
+     'started_at',analysis_started_at,'completed_at',datestr(now,30), ...
+     'elapsed_s',toc(analysis_timer),'plots_requested',logical(make_plots), ...
+@@ -249,7 +249,7 @@
+ x=x(isfinite(x));if isempty(x),y=NaN;else,y=max(x);end
+ end
  function records=analysis_sources(folder)
--here=fileparts(mfilename('fullpath'));names={'summarize_Review_v11.m','plot_Review_v11.m'};
-+here=fileparts(mfilename('fullpath'));names={'summarize_Review_v11.m'};
+-here=fileparts(mfilename('fullpath'));names={'summarize_Review_v11.m'};
++here=fileparts(mfilename('fullpath'));names={'summarize_results.m'};
  destination=fullfile(folder,'analysis_source_snapshot');if ~exist(destination,'dir'),mkdir(destination);end
+ records=repmat(struct('path','','snapshot_path','','sha256',''),numel(names),1);
+ for k=1:numel(names)
+@@ -292,7 +292,7 @@
+ fprintf(fid,'The spatial interior is x<315 mm and y<315 mm on the sampled nonnegative quadrant. Zero-coordinate symmetry axes are interior. Requests on x=315 or y=315 are reported separately. Wrench-domain classification uses independent 16-vertex tension-box image polygons and a scale-aware roundoff allowance. Actual signed margins are retained, so a tiny positive WEC margin is distinguishable from an uncertain boundary.\n\n');
+ fprintf(fid,'A finite tension is independently checked against bounds (%.3g N tolerance) and its requested target (%.3g N). Bounded QP, ACTA and X-ACTA also need their native positive exit flag. Bounded QP never drops the upper bounds. ACTA internal tol is %.3g; X-ACTA internal tol is %.3g with its returned roundoff allowance. These different residuals are not equated; common physical checks provide the comparison.\n\n', ...
+     s.manifest.config.bound_tolerance,s.manifest.config.force_tolerance,s.manifest.config.acta_options.tol,s.manifest.config.xacta_options.tol);
+-fprintf(fid,'WEC_v5 is retained as implemented: it can increase force magnitude, modify zero force, or fail. Its native scaled flag remains true for some unchanged zero requests. T_wec_behavior.csv distinguishes these outcomes using the actual returned force. No statement that all WEC modifications are downward scaling is justified.\n\n');
++fprintf(fid,'WEC is retained as implemented: it can increase force magnitude, modify zero force, or fail. Its native scaled flag remains true for some unchanged zero requests. T_wec_behavior.csv distinguishes these outcomes using the actual returned force. No statement that all WEC modifications are downward scaling is justified.\n\n');
+ fprintf(fid,'L2 differences in T_L2_matched.csv use only physically accepted outputs on the same force. X-ACTA is compared with post-WEC QP only where that force remains unchanged. ACTA/X-ACTA optimize centering objectives and need not minimize tension L2. QP-relative differences are comparative evidence, not independent optimality certificates; the separate active-set oracle validation provides that check on its documented sample.\n\n');
+ fprintf(fid,'T_force_approximation.csv compares each successful bounded output with the independent Euclidean distance from the raw request to the tension-box image polygon. Excess error is descriptive: WEC ray adjustment and analytic centering need not attain the nearest-point solution. Native iteration summaries distinguish the frame interior from its edge; the strict/thin/uncertain force-domain rows are restricted to the frame interior.\n\n');
+ fprintf(fid,'Iteration-domain bins refer to the force supplied to each method: shared post-WEC force for QP/ACTA and raw force for X-ACTA. These force-domain rows describe each method''s workload, not matched-request iteration comparisons. The common_unchanged row uses the shared matched input subset.\n\n');
+--- previous-package/benchmark/compute_norm_differences_saved_v11.m
++++ package/benchmark/compute_norm_differences_saved.m
+@@ -1,4 +1,4 @@
+-function result = compute_norm_differences_saved_v11(inputDir,outputDir,inventoryFile)
++function result = compute_norm_differences_saved(inputDir,outputDir,inventoryFile)
+ assert(nargin>=1&&~isempty(inputDir),'Specify the saved full-run directory.');
+ here=fileparts(mfilename('fullpath'));
+ if nargin<2||isempty(outputDir),outputDir=here;end
+@@ -41,7 +41,7 @@
+     native_applicable=[false false true false];
+     sourceFile=[mfilename('fullpath') '.m'];sourceHash=hash_file(sourceFile);
+     sourceDir=fullfile(outputDir,'norm_difference_source');mkdir(sourceDir);
+-    copyfile(sourceFile,fullfile(sourceDir,'compute_norm_differences_saved_v11.m'));
++    copyfile(sourceFile,fullfile(sourceDir,'compute_norm_differences_saved.m'));
+     guardDir=fullfile(outputDir,'norm_solver_guards');mkdir(guardDir);
+     for k=1:numel(manifest.solver_functions)
+         fn=manifest.solver_functions{k};fid=fopen(fullfile(guardDir,[fn '.m']),'w');assert(fid~=-1);
+@@ -198,7 +198,7 @@
+     assert(all(after.passed)&&isequal(before.observed_sha256,after.observed_sha256));
+     assert(strcmp(receipt.inventory_sha256,hash_file(inventoryFile)));
+     assert(strcmp(sourceHash,hash_file(sourceFile))&&strcmp(sourceHash, ...
+-        hash_file(fullfile(sourceDir,'compute_norm_differences_saved_v11.m'))));
++        hash_file(fullfile(sourceDir,'compute_norm_differences_saved.m'))));
+     write_notes(outputDir,statistics,geometry_difference);
+     receipt.status='passed';receipt.finished_at=datestr(now,30);
+     receipt.original_inputs_unchanged=true;receipt.input_files_checked=height(before);
+--- previous-package/benchmark/reproduce_saved_results.m
++++ package/benchmark/reproduce_saved_results.m
+@@ -42,29 +42,29 @@
+ end
+ oldPath=path;oldFolder=pwd;cleanup=onCleanup(@()restore_environment(oldPath,oldFolder)); %#ok<NASGU>
+ addpath(here,'-begin');addpath(captured,'-begin');addpath(guardDir,'-begin');cd(guardDir);
+-clear summarize_Review_v11 plot_Review_v11 analyze_interior_infeasible_v11
++clear summarize_results plot_results analyze_interior_infeasible
+ clear(manifest.solver_functions{:});rehash;
+ for k=1:numel(manifest.solver_functions)
+     fn=manifest.solver_functions{k};assert(strcmpi(which(fn),fullfile(guardDir,[fn '.m'])));
+ end
+-summary=summarize_Review_v11(replay,false);
++summary=summarize_results(replay,false);
+ publish={'T_domain.csv','T_timing.csv','T_quality.csv','T_postwec_components.csv', ...
+     'T_iterative_domains.csv','T_wec_behavior.csv','T_pipeline_parity.csv', ...
+     'T_force_approximation.csv','T_complete_paths_matched.csv'};
+ if options.interior_table
+-    analyze_interior_infeasible_v11(replay);
++    analyze_interior_infeasible(replay);
+     publish=[publish,{'T_complete_paths_matched_interiors.csv'}];
+ end
+ for k=1:numel(publish),copyfile(fullfile(replay,publish{k}),fullfile(outputDir,publish{k}));end
+ if options.norm_statistics
+-    compute_norm_differences_saved_v11(inputDir,fullfile(outputDir,'norm_analysis'),options.inventory_file);
++    compute_norm_differences_saved(inputDir,fullfile(outputDir,'norm_analysis'),options.inventory_file);
+ end
+ for k=1:numel(files)
+     records(k).sha256_after=sha256(fullfile(inputDir,files{k}));
+     assert(strcmp(records(k).sha256_before,records(k).sha256_after),'Original input changed: %s',files{k});
+ end
+-sources={'reproduce_saved_results.m','captured/summarize_Review_v11.m', ...
+-    'captured/analyze_interior_infeasible_v11.m'};
++sources={'reproduce_saved_results.m','captured/summarize_results.m', ...
++    'captured/analyze_interior_infeasible.m'};
+ sourceHashes=repmat(struct('file','','sha256',''),numel(sources),1);
+ for k=1:numel(sources),sourceHashes(k)=struct('file',sources{k},'sha256',sha256(fullfile(here,sources{k})));end
+ result=struct('status','passed','ninputs',manifest.ninputs,'input_files_unchanged',true, ...
+--- previous-package/benchmark/run_benchmark.m
++++ package/benchmark/run_benchmark.m
+@@ -24,26 +24,26 @@
+ if ~java.io.File(outputDir).isAbsolute(),outputDir=fullfile(pwd,outputDir);end
+ outputDir=char(java.io.File(outputDir).getCanonicalPath());
+ assert(~isfolder(outputDir)&&~isfile(outputDir),'Choose a new output directory.');
+-functions={'wt4_2024_minmax_v4','wt_pott_v2','wt_qp_bounded_v11', ...
+-    'wt_gouttefarde_v2','wt_acta','wt_xacta','WEC_v5'};
++functions={'wt_direct','wt_pott','wt_qp_bounded', ...
++    'wt_gouttefarde','wt_acta','wt_xacta','WEC'};
+ for k=1:numel(functions)
+     assert(isfile(fullfile(sourceDir,[functions{k} '.m'])),'Missing package source: %s',functions{k});
+ end
+ mkdir(outputDir);runtimeDir=fullfile(outputDir,'runtime_source');mkdir(runtimeDir);
+-copyfile(fullfile(here,'captured','Compare_Review_v11.m'),runtimeDir);
++copyfile(fullfile(here,'captured','compare_methods.m'),runtimeDir);
+ for k=1:numel(functions)
+     copyfile(fullfile(sourceDir,[functions{k} '.m']),runtimeDir);
+ end
+ oldPath=path;oldFolder=pwd;createdPool=isempty(gcp('nocreate'));
+ cleanup=onCleanup(@()restore_environment(oldPath,oldFolder,createdPool)); %#ok<NASGU>
+ addpath(runtimeDir,'-begin');cd(runtimeDir);
+-clear Compare_Review_v11
++clear compare_methods
+ clear(functions{:});rehash;
+-assert(strcmpi(which('Compare_Review_v11'),fullfile(runtimeDir,'Compare_Review_v11.m')));
++assert(strcmpi(which('compare_methods'),fullfile(runtimeDir,'compare_methods.m')));
+ config=options;config.outdir=outputDir;config.analyze=false;
+ fprintf('New %s capture; results: %s\n',config.profile,outputDir);
+ fprintf('This run will not select or replace recorded timing observations.\n');
+-result=Compare_Review_v11(config);
++result=compare_methods(config);
+ assert(strcmp(result.status,'raw_complete'),'Capture did not complete.');
+ end
+ function restore_environment(oldPath,oldFolder,createdPool)
+--- previous-package/examples/run_example.m
++++ package/examples/run_example.m
+@@ -25,14 +25,14 @@
+ target_force = requested_force;
+ wec_flag = NaN;
+ names = {'DM'};
+-functions = {@wt4_2024_minmax_v4};
++functions = {@wt_direct};
+ if strcmp(mode,'all')
+-    [target_force,wec_flag] = WEC_v5(parameters,position,requested_force);
++    [target_force,wec_flag] = WEC(parameters,position,requested_force);
+     assert(isequal(size(target_force),[2 1]) && all(isfinite(target_force)), ...
+         'run_example:UnavailableTarget','WEC did not return a finite force for the feasible example.');
+     names = {'DM','ICFM','Bounded QP','VTDA-L2','ACTA','X-ACTA'};
+-    functions = {@wt4_2024_minmax_v4,@wt_pott_v2,@wt_qp_bounded_v11, ...
+-        @wt_gouttefarde_v2,@wt_acta,@wt_xacta};
++    functions = {@wt_direct,@wt_pott,@wt_qp_bounded, ...
++        @wt_gouttefarde,@wt_acta,@wt_xacta};
+ end
+ result = struct('position_mm',position,'anchors_mm',parameters.param.M, ...
+     'requested_force_N',requested_force,'wec_target_N',target_force, ...
+--- previous-package/src/WEC_v5.m
++++ package/src/WEC.m
+@@ -1,4 +1,4 @@
+-function [F_new, is_scaled] = WEC_v5(WDM,P,F)
++function [F_new, is_scaled] = WEC(WDM,P,F)
+ is_scaled = true;
+ v = WDM.param.M-repmat(P,1,size(WDM.param.M,2));
+ Tmin=WDM.param.lim_inf(1);
+--- previous-package/src/wt4_2024_minmax_v4.m
++++ package/src/wt_direct.m
+@@ -1,4 +1,4 @@
+-function WDM=wt4_2024_minmax_v4(WDM,P,F)
++function WDM=wt_direct(WDM,P,F)
+ Tmin    = WDM.param.lim_inf(1);
+ Tmax    = WDM.param.lim_sup(1);
+ Tau_max = (Tmax-Tmin)/Tmin;
+--- previous-package/src/wt_gouttefarde_v2.m
++++ package/src/wt_gouttefarde.m
+@@ -1,4 +1,4 @@
+-function WDM=wt_gouttefarde_v2(WDM,P,F)
++function WDM=wt_gouttefarde(WDM,P,F)
+     Tmin=WDM.param.lim_inf;
+     Tmax=WDM.param.lim_sup;
+     WDM.scale_dir=0;
+--- previous-package/src/wt_pott_v2.m
++++ package/src/wt_pott.m
+@@ -1,4 +1,4 @@
+-function WDM=wt_pott_v2(WDM,P,F)
++function WDM=wt_pott(WDM,P,F)
+ Tmin=WDM.param.lim_inf;
+ Tmax=WDM.param.lim_sup;
+ WDM.scale_dir=0;
+--- previous-package/src/wt_qp_bounded_v11.m
++++ package/src/wt_qp_bounded.m
+@@ -1,4 +1,4 @@
+-function WDM = wt_qp_bounded_v11(WDM,P,F)
++function WDM = wt_qp_bounded(WDM,P,F)
+ persistent options
+ if isempty(options)
+     options=optimoptions('quadprog','Algorithm','interior-point-convex', ...

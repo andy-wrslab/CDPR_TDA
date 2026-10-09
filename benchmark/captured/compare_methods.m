@@ -1,5 +1,5 @@
-function result = Compare_Review_v11(config)
-%COMPARE_REVIEW_V11 Fresh matched post-WEC and raw-force reviewer experiment.
+function result = compare_methods(config)
+%COMPARE_METHODS Fresh matched post-WEC and raw-force reviewer experiment.
 %   config.profile='full' uses all 30,965,760 original grid inputs; 'smoke'
 %   uses 192. Every retained series has one observation per attempted input.
 %   Eight fresh series: WEC alone; five allocations after the identical
@@ -8,15 +8,15 @@ function result = Compare_Review_v11(config)
 %   The direct pipeline includes WEC and finite dispatch checks, attempts DM
 %   on every finite WEC force, and is physically assessed after timing.
 %   No zero substitution, timing replacement, re-timing, or best-of selection.
-%   config.analyze=false captures raw data only; summarize_Review_v11(outdir)
+%   config.analyze=false captures raw data only; summarize_results(outdir,false)
 %   can be run separately. Raw arrays require completed_chunks=true; pending
 %   preallocated rows are undefined until their chunk has been written.
 if nargin<1,config=struct();end
 if ischar(config)||isstring(config),config=struct('profile',char(config));end
 config=defaults(config);here=fileparts(mfilename('fullpath'));
-if isempty(config.outdir),config.outdir=fullfile(here,'reviewer_xacta','results',['review_v11_' config.profile]);end
+if isempty(config.outdir),config.outdir=fullfile(here,'reviewer_xacta','results',['review_' config.profile]);end
 assert(~exist(fullfile(config.outdir,'manifest.mat'),'file'), ...
-    'Compare_Review_v11:ExistingRun','Choose a fresh output folder: %s',config.outdir);
+    'compare_methods:ExistingRun','Choose a fresh output folder: %s',config.outdir);
 if ~exist(config.outdir,'dir'),mkdir(config.outdir);end
 old_path=path;path_cleanup=onCleanup(@()path(old_path)); %#ok<NASGU>
 addpath(here);
@@ -26,11 +26,11 @@ diary(fullfile(config.outdir,'run_log.txt'));
 methods={'DM post-WEC','ICFM post-WEC','Bounded QP post-WEC','VTDA-L2 post-WEC', ...
     'ACTA post-WEC','X-ACTA raw','WEC + DM raw'};
 files={'dm_postwec','icfm_postwec','qp_postwec','vtda_postwec','acta_postwec','xacta_raw','wecdm_raw'};
-functions={'wt4_2024_minmax_v4','wt_pott_v2','wt_qp_bounded_v11', ...
-    'wt_gouttefarde_v2','wt_acta','wt_xacta','WEC_v5'};
+functions={'wt_direct','wt_pott','wt_qp_bounded', ...
+    'wt_gouttefarde','wt_acta','wt_xacta','WEC'};
 for k=1:numel(functions)
     assert(strcmpi(which(functions{k}),fullfile(here,[functions{k} '.m'])), ...
-        'Compare_Review_v11:ShadowedSource','Unexpected source resolution: %s',functions{k});
+        'compare_methods:ShadowedSource','Unexpected source resolution: %s',functions{k});
 end
 WDM.param.M=[-315 315 315 -315;-315 -315 315 315];
 WDM.param.TOLL=1e-14;WDM.param.TOLL_WEC=1e-9;
@@ -53,11 +53,11 @@ manifest=struct('config',config,'methods',{methods},'files',{files}, ...
     'chunk_order',chunk_order,'method_order',zeros(nchunks,7), ...
     'started_at',datestr(now,30),'status','incomplete','matlab_version',version, ...
     'toolbox_versions',ver,'source_snapshot',snapshot_sources(here,config.outdir,functions), ...
-    'input_order','pose varies fastest; then force magnitude and angle as original v8', ...
+    'input_order','pose varies fastest; then force magnitude and angle as in the recorded input grid', ...
     'frame_interior','x<315 and y<315; zero axes are interior symmetry axes', ...
     'timing_policy','one raw wall-clock observation per attempted public call; observed maxima, not WCET', ...
-    'shared_wec_policy','fresh WEC_v5; nonfinite or independently outside force skips all five allocations; no substitute', ...
-    'pipeline_policy','fresh WEC_v5 plus finite check plus DM; physical checks after timer', ...
+    'shared_wec_policy','fresh WEC; nonfinite or independently outside force skips all five allocations; no substitute', ...
+    'pipeline_policy','fresh WEC plus finite check plus DM; physical checks after timer', ...
     'output_code_legend','1 finite; -1 exception; -2 malformed; -3 nonfinite; -4 shared-WEC skip; -5 invalid pipeline WEC; 0 pending', ...
     'acceptance_bits',{{'finite','bounds','convergence','successful','exact_target','exact_raw'}}, ...
     'wec_code_legend','1 finite and independently allowed; -1 exception; -2 malformed; -3 nonfinite; -4 finite outside', ...
@@ -71,7 +71,7 @@ save(fullfile(config.outdir,'manifest.mat'),'manifest','WDM','-v7.3');
 pool=gcp('nocreate');
 if isempty(pool),pool=parpool('Processes',config.workers);end
 assert(~isa(pool,'parallel.ThreadPool')&&pool.NumWorkers==config.workers, ...
-    'Compare_Review_v11:PoolMismatch','Use the requested number of process workers.');
+    'compare_methods:PoolMismatch','Use the requested number of process workers.');
 worker_cleanup=onCleanup(@()restore_worker_warnings(pool)); %#ok<NASGU>
 fetchOutputs(parfevalOnAll(pool,@worker_warning_state,1,'capture',here));
 fetchOutputs(parfevalOnAll(pool,@verify_worker_solvers,1,here,functions));
@@ -85,7 +85,7 @@ manifest.warmup_calls_per_worker=fetchOutputs(parfevalOnAll(pool,@warm_worker,1,
 initialize_files(config.outdir,files,n,nchunks);
 manifest.measured_attempts=zeros(1,8);manifest.pipeline_shared_wec_mismatches=0;
 save(fullfile(config.outdir,'manifest.mat'),'manifest','-append');
-fprintf('Review v11: %s, %d poses x %d forces = %d inputs; %d chunks; one measured call/series.\n', ...
+fprintf('Review: %s, %d poses x %d forces = %d inputs; %d chunks; one measured call/series.\n', ...
     config.profile,nposes,nforces,n,nchunks);
 fprintf('Strict frame interior includes zero axes; boundary is x=315 or y=315.\n');
 fprintf('Shared WEC invalid -> all five dependent calls skipped; X-ACTA still receives raw F.\n');
@@ -169,16 +169,16 @@ for block=1:nchunks
     fprintf('Chunk %d/%d complete, inputs %d:%d; WEC allowed %d/%d; %.1f min.\n', ...
         block,nchunks,first,last,sum(allowed),count,manifest.capture_seconds/60);
 end
-assert(manifest.pipeline_shared_wec_mismatches==0,'Compare_Review_v11:WECDifference', ...
+assert(manifest.pipeline_shared_wec_mismatches==0,'compare_methods:WECDifference', ...
     'Directly recomputed pipeline WEC differed from shared WEC; inspect raw pipeline_Fw.');
-assert(verify_sources(manifest.source_snapshot),'Compare_Review_v11:SourceChanged', ...
+assert(verify_sources(manifest.source_snapshot),'compare_methods:SourceChanged', ...
     'Production source changed during measurement.');
 manifest.status='raw_complete';manifest.finished_at=datestr(now,30);
 manifest.capture_seconds=toc(timer_run);manifest.source_snapshot_unchanged=true;
 save(fullfile(config.outdir,'manifest.mat'),'manifest','-append');
 result=manifest;
 fprintf('All raw capture complete: %.1f min; %s\n',manifest.capture_seconds/60,config.outdir);
-if config.analyze,result=summarize_Review_v11(config.outdir);end
+if config.analyze,result=summarize_results(config.outdir);end
 end
 
 function c=defaults(c)
@@ -234,7 +234,7 @@ end
 function [fw,scaled,elapsed,code]=timed_wec(WDM,p,f)
 fw=[NaN;NaN];scaled=int8(-1);code=int8(1);timer=[];
 try
-    timer=tic;[candidate,native]=WEC_v5(WDM,p,f);elapsed=toc(timer);
+    timer=tic;[candidate,native]=WEC(WDM,p,f);elapsed=toc(timer);
     if ~isnumeric(candidate)||~isreal(candidate)||numel(candidate)~=2
         code=int8(-2);
     else
@@ -251,19 +251,19 @@ function [out,elapsed,code,fw]=timed_method(m,WDM,p,f)
 out=struct();fw=[NaN;NaN];timer=[];code=int8(1);
 try
     switch m
-        case 1,timer=tic;out=wt4_2024_minmax_v4(WDM,p,f);elapsed=toc(timer);
-        case 2,timer=tic;out=wt_pott_v2(WDM,p,f);elapsed=toc(timer);
-        case 3,timer=tic;out=wt_qp_bounded_v11(WDM,p,f);elapsed=toc(timer);
-        case 4,timer=tic;out=wt_gouttefarde_v2(WDM,p,f);elapsed=toc(timer);
+        case 1,timer=tic;out=wt_direct(WDM,p,f);elapsed=toc(timer);
+        case 2,timer=tic;out=wt_pott(WDM,p,f);elapsed=toc(timer);
+        case 3,timer=tic;out=wt_qp_bounded(WDM,p,f);elapsed=toc(timer);
+        case 4,timer=tic;out=wt_gouttefarde(WDM,p,f);elapsed=toc(timer);
         case 5,timer=tic;out=wt_acta(WDM,p,f);elapsed=toc(timer);
         case 6,timer=tic;out=wt_xacta(WDM,p,f);elapsed=toc(timer);
         case 7
             % The complete online path, including WEC's polygon construction
             % and finite-output dispatch, is inside this single interval.
             timer=tic;
-            fw=WEC_v5(WDM,p,f);
+            fw=WEC(WDM,p,f);
             if isnumeric(fw)&&isreal(fw)&&numel(fw)==2&&all(isfinite(fw(:)))
-                fw=fw(:);out=wt4_2024_minmax_v4(WDM,p,fw);
+                fw=fw(:);out=wt_direct(WDM,p,fw);
             else
                 code=int8(-5);
                 if ~isnumeric(fw)||~isreal(fw)||numel(fw)~=2,fw=[NaN;NaN];else,fw=fw(:);end
@@ -393,12 +393,12 @@ end
 
 function state = pin_workers(pool,enabled)
 state=struct('requested',logical(enabled),'applied',false, ...
-    'reason','disabled or hardware/pool does not match v8', ...
+    'reason','disabled or hardware/pool does not match the recorded configuration', ...
     'worker_pids',[],'worker_affinity_masks',[],'client_affinity_mask',[], ...
     'original_worker_masks',[],'original_client_mask',[]);
 if ~(enabled && ispc && feature('numcores')==16 && ...
         str2double(getenv('NUMBER_OF_PROCESSORS'))==24 && pool.NumWorkers<=8)
-    fprintf('P-core pinning skipped (disabled or hardware/pool does not match v8).\n');
+    fprintf('P-core pinning skipped (disabled or hardware/pool does not match the recorded configuration).\n');
     return
 end
 state.worker_pids=fetchOutputs(parfevalOnAll(pool,@feature,1,'getpid'));
@@ -432,14 +432,14 @@ for k=1:numel(state.worker_pids)
         process=System.Diagnostics.Process.GetProcessById(int32(state.worker_pids(k)));
         process.ProcessorAffinity=System.IntPtr(state.original_worker_masks(k));
     catch err
-        warning('Compare_Review_v11:RestoreAffinity','Could not restore worker affinity: %s',err.message);
+        warning('compare_methods:RestoreAffinity','Could not restore worker affinity: %s',err.message);
     end
 end
 try
     client=System.Diagnostics.Process.GetCurrentProcess();
     client.ProcessorAffinity=System.IntPtr(state.original_client_mask);
 catch err
-    warning('Compare_Review_v11:RestoreAffinity','Could not restore client affinity: %s',err.message);
+    warning('compare_methods:RestoreAffinity','Could not restore client affinity: %s',err.message);
 end
 end
 
@@ -457,7 +457,7 @@ end
 function result=verify_worker_solvers(here,functions)
 for k=1:numel(functions)
     assert(strcmpi(which(functions{k}),fullfile(here,[functions{k} '.m'])), ...
-        'Compare_Review_v11:WorkerSolverPath','Worker has a shadowed solver: %s',functions{k});
+        'compare_methods:WorkerSolverPath','Worker has a shadowed solver: %s',functions{k});
 end
 result=true;
 end
@@ -466,7 +466,7 @@ function restore_worker_warnings(pool)
 try
     fetchOutputs(parfevalOnAll(pool,@worker_warning_state,1,'restore'));
 catch err
-    warning('Compare_Review_v11:RestoreWarnings','Could not restore worker warnings: %s',err.message);
+    warning('compare_methods:RestoreWarnings','Could not restore worker warnings: %s',err.message);
 end
 end
 
@@ -477,7 +477,7 @@ if ~strcmpi(state,'on'),diary('off');end
 end
 
 function records=snapshot_sources(here,outdir,functions)
-names=[{'Compare_Review_v11'},functions];
+names=[{'compare_methods'},functions];
 records=repmat(struct('original_path','','snapshot_path','','sha256',''),numel(names),1);
 folder=fullfile(outdir,'source_snapshot');if ~exist(folder,'dir'),mkdir(folder);end
 for k=1:numel(names)

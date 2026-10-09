@@ -3,13 +3,15 @@ METHOD SOURCES
 What these files are
 
 src/ contains documented copies of the seven numerical MATLAB files used in
-the saved comparison. Only full-line comments and blank lines were changed;
-executable lines are unchanged. Function names preserve the measured interfaces.
+the saved comparison. Public function names omit revision suffixes; numerical
+statements are preserved after that name mapping. Comments and blank lines
+were also revised. Inputs, outputs, settings and timing boundaries are unchanged.
+provenance/SOURCE_MANIFEST.csv maps the original files to the delivered names.
 The comments distinguish a mathematical method reference from software authorship.
 No repository URL, redistribution license or original-author-code equivalence is
 inferred from a paper citation or a function filename.
 
-Direct -- wt4_2024_minmax_v4.m
+Direct -- wt_direct.m
 
 The accompanying manuscript is titled "Efficient L2-Optimal
 Tension Distribution in Planar Translational Cable Driven Parallel Robots with
@@ -19,7 +21,7 @@ Eqs. (11)-(12), reduced scalar objective Eq. (13), projection Eq. (14).
 The actual source forms the full Pm=N'*N. Its configuration labels II/III select
 the alpha2/alpha1 axis. WEC is a separate preprocessing function.
 
-ICFM -- wt_pott_v2.m
+ICFM -- wt_pott.m
 
 The supplied manuscript identifies the method with reference [27]:
 A. Pott, "An improved force distribution algorithm for over-constrained
@@ -32,7 +34,7 @@ The captured file has no paper citation or author-code origin declaration.
 The ICFM label maps the comparison method to the manuscript's literature context;
 it does not establish that the delivered MATLAB file is the authors' software.
 
-VTDA-L2 -- wt_gouttefarde_v2.m
+VTDA-L2 -- wt_gouttefarde.m
 
 Manuscript reference [29]: M. Gouttefarde, J. Lamaury, C. Reichert and
 T. Bruckmann, "A versatile tension distribution algorithm for n-dof parallel
@@ -42,7 +44,7 @@ safeguard and a feasible-vertex fallback. Those implementation branches are
 reported explicitly rather than treated as a proof of optimality or equivalence
 to original-author software. No author-code provenance is recorded in its header.
 
-Bounded QP -- wt_qp_bounded_v11.m
+Bounded QP -- wt_qp_bounded.m
 
 The tested numerical backend is MATLAB quadprog, interior-point-convex,
 Optimization Toolbox 24.2 with MATLAB R2024b Update 4. The local wrapper solves
@@ -77,7 +79,7 @@ unit barrier weights and disclosed numerical safeguards. These are mathematical
 implementation choices; regression agreement with archived local code is not
 evidence of original-author-code equivalence.
 
-WEC -- WEC_v5.m
+WEC -- WEC.m
 
 Manuscript reference [34]: G. Boschetti, C. Passarini, A. Trevisani and
 D. Zanotto, "A fast algorithm for wrench exertion capability computation,"

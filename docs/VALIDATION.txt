@@ -1,14 +1,45 @@
 PACKAGE VALIDATION -- 8 OCTOBER 2026
 
+Validation scope
+
+The results below describe the preceding package, before revision suffixes
+were removed from public function names. They remain evidence for its numerical
+implementation and full saved-data analysis. They do not by themselves validate
+the renamed files or their updated references.
+
+Current package checks
+
+The renamed package passed fresh-extraction tests in MATLAB R2024b Update 4
+after restoredefaultpath. The Direct example and all six comparison methods
+passed; the complete all-method example outputs were exactly equal to those
+from the preceding package, including tensions, residuals and native statuses.
+
+The new 192-request smoke capture completed with status raw_complete and the
+manifest recorded the renamed functions. Saved-data replay passed with unchanged
+input hashes. The worker pool closed and the original path/folder were restored.
+Replaying the preceding package's 192-request saved capture also passed; all
+nine published CSV tables were exactly equal to their preceding outputs. The
+Direct example still passed after both replays.
+
+All 14 MATLAB files were checked against the exact documented name/reference
+transformation of the preceding package. Numerical statements, solver settings
+and measured timer boundaries are preserved. The five historical norm-analysis
+input filenames and the full-data inventory remain unchanged. All final MATLAB
+executable statements match the tested extraction. A harness help example was
+clarified afterward to pass false explicitly for the omitted plot helper.
+No new full-grid benchmark or full saved-data replay is claimed for the renamed
+package; the full-data evidence below remains
+the preceding package's analysis.
+
 Environment and isolation
 
 MATLAB 24.2.0.2833386 (R2024b) Update 4, 64-bit Windows. The package was ZIPped,
 extracted into a new directory containing spaces, and run in a fresh MATLAB
 session after restoredefaultpath. The tests used the documented example and
 benchmark entry points, without adding the original development directory.
-The final executable files are checked against that clean tested extraction.
+Those executable files were checked against that clean tested extraction.
 
-Commands exercised from the extracted package root
+Commands exercised in the preceding package
 
   addpath('examples');
   result = run_example;
@@ -32,7 +63,7 @@ input hashes. The wrappers restored the working directory and MATLAB path;
 the worker pool they created was closed. The Direct example also passed after
 saved-data replay, confirming that replay guards did not leave it unusable.
 
-Full saved-data analysis
+Full saved-data analysis of the preceding package
 
 The documented saved-data wrapper was also run on all 30,965,760 original
 requests, with interior_table=true and norm_statistics=true. This exercised
@@ -60,11 +91,13 @@ as a new full measurement during package validation. Its preserved harness was
 exercised through the small profile. The newly measured smoke times are not
 substitutes for any reported paper result.
 
-All seven numerical functions preserve every nonblank, non-comment source line,
-including inline comments, from the measured versions. The captured harness is
-byte-identical. The analysis helper's one metadata change is disclosed in
-benchmark/ANALYSIS_METADATA_CHANGE.txt. Source identities are in
-provenance/SOURCE_MANIFEST.csv; package hashes are in PACKAGE_MANIFEST.csv there.
+The current seven numerical functions preserve numerical statements after the
+documented function-name mapping. The harness also retains its numerical
+operations and timing boundaries; function references and metadata-only log/
+default-directory names have changed. Analysis metadata edits are disclosed in
+benchmark/ANALYSIS_METADATA_CHANGE.txt. Source identities and original names are
+in provenance/SOURCE_MANIFEST.csv; package hashes are in PACKAGE_MANIFEST.csv
+there. Comments and filenames are not used as evidence of numerical equivalence.
 
 A separate reader reviewed the README without relying on development paths.
 The archive extraction instruction was corrected to review_v11_full/. The

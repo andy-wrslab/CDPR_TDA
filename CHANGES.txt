@@ -1,18 +1,30 @@
 PRESENTATION CHANGES -- 8 OCTOBER 2026
 
 Preserved
-  All executable lines of the seven numerical functions are unchanged from
-  the sources used for the reported experiment. No arithmetic, branching,
-  solver setting, convergence rule or public-function diagnostic was refactored.
-  The captured benchmark harness and its timing boundaries remain unchanged.
+  Numerical statements in the seven numerical functions are preserved after
+  the function-name mapping below. No arithmetic, branching, solver setting,
+  convergence rule or public-function diagnostic was refactored. Benchmark
+  numerical operations, call order and timing boundaries remain unchanged.
+
+Function names
+  Removed revision suffixes from the delivered code and updated callers and
+  documentation. Direct is wt_direct (formerly wt4_2024_minmax_v4); WEC is WEC
+  (formerly WEC_v5). The comparison functions are wt_pott, wt_qp_bounded and
+  wt_gouttefarde (formerly wt_pott_v2, wt_qp_bounded_v11 and wt_gouttefarde_v2).
+  ACTA and X-ACTA retain wt_acta and wt_xacta. Benchmark helper names,
+  log messages and default directory names likewise omit revision suffixes.
+  provenance/SOURCE_MANIFEST.csv records the full original-to-current mapping
+  and source hashes. Historical archive paths, source-snapshot names and hashes
+  are retained where needed to verify the original saved experiment. MATLAB
+  release numbers, MAT format identifiers and bibliographic versions are intact.
 
 Documentation
   Replaced historical source headers with function contracts: purpose, inputs,
   dimensions, units, outputs and method-specific statuses. Added brief comments
   connecting Direct's main steps to Algorithm 1 and the manuscript equations.
   Corrected the basis equation reference and documented full P=N'*N construction.
-  Standardized new documentation on 'tension distribution'. Original identifiers,
-  bibliographic titles and captured output labels retain their recorded spelling.
+  Standardized new documentation on 'tension distribution'. Bibliographic
+  titles and historical captured output labels retain their recorded spelling.
 
 New example and wrappers
   Added examples/run_example.m. It calls each method from fresh parameters,
@@ -33,7 +45,7 @@ Analysis dependency cleanup
   obsolete plot helper. The wrapper always disables the captured plot branch.
   This changes provenance metadata only, not a numerical statistic. The original
   plot helper and historical figure exports are omitted. Exact source identities
-  and this one-line analysis-source change are recorded with the benchmark files.
+  and metadata-only analysis changes are recorded with the benchmark files.
 
 Package cleanup
   Omitted internal rebuttal discussions, draft manuscripts, debug output, logs,
@@ -45,4 +57,6 @@ Tests
   Small example/comparison and smoke-capture checks execute new demonstration
   calls. Their results validate this package only; they do not alter or replace
   the previously reported full-run data. The full grid is not rerun merely for
-  comment, documentation or packaging changes. See docs/VALIDATION.txt.
+  function naming, comment, documentation or packaging changes. Prior full
+  saved-data replay and current package checks are distinguished in
+  docs/VALIDATION.txt.

@@ -1,5 +1,5 @@
-function summary = summarize_Review_v11(folder,make_plots)
-%SUMMARIZE_REVIEW_V11 Analyze immutable one-pass reviewer capture.
+function summary = summarize_results(folder,make_plots)
+%SUMMARIZE_RESULTS Analyze immutable one-pass reviewer capture.
 %   No solver is called and no raw value is replaced. At most a few scalar
 %   columns are loaded together; full diagnostic matrices are never loaded.
 %   Timings include attempted failures; skipped calls have NaN timing and
@@ -131,7 +131,7 @@ names={'T_domain','T_timing','T_quality','T_postwec_components','T_L2_matched', 
 for k=1:numel(names),writetable(summary.(names{k}),fullfile(folder,[names{k} '.csv']));end
 save(fullfile(folder,'summary.mat'),'summary','-v7.3');
 write_report(folder,summary);
-if make_plots,plot_Review_v11(folder,summary);end
+if make_plots,plot_results(folder,summary);end
 % Keep the original measured manifest immutable. This separate receipt is
 % written last, after every requested analysis artifact succeeds.
 analysis_receipt=struct('status','analysis_complete','capture_status',manifest.status, ...
@@ -274,7 +274,7 @@ x=x(isfinite(x));if isempty(x),y=NaN;else,y=max(x);end
 end
 
 function records=analysis_sources(folder)
-here=fileparts(mfilename('fullpath'));names={'summarize_Review_v11.m'};
+here=fileparts(mfilename('fullpath'));names={'summarize_results.m'};
 destination=fullfile(folder,'analysis_source_snapshot');if ~exist(destination,'dir'),mkdir(destination);end
 records=repmat(struct('path','','snapshot_path','','sha256',''),numel(names),1);
 for k=1:numel(names)
@@ -318,7 +318,7 @@ fprintf(fid,'## Interpretation and acceptance\n\n');
 fprintf(fid,'The spatial interior is x<315 mm and y<315 mm on the sampled nonnegative quadrant. Zero-coordinate symmetry axes are interior. Requests on x=315 or y=315 are reported separately. Wrench-domain classification uses independent 16-vertex tension-box image polygons and a scale-aware roundoff allowance. Actual signed margins are retained, so a tiny positive WEC margin is distinguishable from an uncertain boundary.\n\n');
 fprintf(fid,'A finite tension is independently checked against bounds (%.3g N tolerance) and its requested target (%.3g N). Bounded QP, ACTA and X-ACTA also need their native positive exit flag. Bounded QP never drops the upper bounds. ACTA internal tol is %.3g; X-ACTA internal tol is %.3g with its returned roundoff allowance. These different residuals are not equated; common physical checks provide the comparison.\n\n', ...
     s.manifest.config.bound_tolerance,s.manifest.config.force_tolerance,s.manifest.config.acta_options.tol,s.manifest.config.xacta_options.tol);
-fprintf(fid,'WEC_v5 is retained as implemented: it can increase force magnitude, modify zero force, or fail. Its native scaled flag remains true for some unchanged zero requests. T_wec_behavior.csv distinguishes these outcomes using the actual returned force. No statement that all WEC modifications are downward scaling is justified.\n\n');
+fprintf(fid,'WEC is retained as implemented: it can increase force magnitude, modify zero force, or fail. Its native scaled flag remains true for some unchanged zero requests. T_wec_behavior.csv distinguishes these outcomes using the actual returned force. No statement that all WEC modifications are downward scaling is justified.\n\n');
 fprintf(fid,'L2 differences in T_L2_matched.csv use only physically accepted outputs on the same force. X-ACTA is compared with post-WEC QP only where that force remains unchanged. ACTA/X-ACTA optimize centering objectives and need not minimize tension L2. QP-relative differences are comparative evidence, not independent optimality certificates; the separate active-set oracle validation provides that check on its documented sample.\n\n');
 fprintf(fid,'T_force_approximation.csv compares each successful bounded output with the independent Euclidean distance from the raw request to the tension-box image polygon. Excess error is descriptive: WEC ray adjustment and analytic centering need not attain the nearest-point solution. Native iteration summaries distinguish the frame interior from its edge; the strict/thin/uncertain force-domain rows are restricted to the frame interior.\n\n');
 fprintf(fid,'Iteration-domain bins refer to the force supplied to each method: shared post-WEC force for QP/ACTA and raw force for X-ACTA. These force-domain rows describe each method''s workload, not matched-request iteration comparisons. The common_unchanged row uses the shared matched input subset.\n\n');

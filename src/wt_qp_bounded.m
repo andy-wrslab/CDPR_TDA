@@ -1,6 +1,6 @@
-function WDM = wt_qp_bounded_v11(WDM,P,F)
-% WT_QP_BOUNDED_V11 Bounded minimum-norm cable-tension distribution.
-%   OUT = wt_qp_bounded_v11(WDM,P,F) solves min 0.5*T'*T subject to W*T=F
+function WDM = wt_qp_bounded(WDM,P,F)
+% WT_QP_BOUNDED Bounded minimum-norm cable-tension distribution.
+%   OUT = wt_qp_bounded(WDM,P,F) solves min 0.5*T'*T subject to W*T=F
 %   and lim_inf<=T<=lim_sup using MATLAB quadprog. Both bounds are retained
 %   on every solve; there is no upper-bound-removal fallback.
 %

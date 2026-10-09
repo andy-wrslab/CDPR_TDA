@@ -50,14 +50,14 @@ target_force = requested_force;
 wec_flag = NaN;
 
 names = {'DM'};
-functions = {@wt4_2024_minmax_v4};
+functions = {@wt_direct};
 if strcmp(mode,'all')
-    [target_force,wec_flag] = WEC_v5(parameters,position,requested_force);
+    [target_force,wec_flag] = WEC(parameters,position,requested_force);
     assert(isequal(size(target_force),[2 1]) && all(isfinite(target_force)), ...
         'run_example:UnavailableTarget','WEC did not return a finite force for the feasible example.');
     names = {'DM','ICFM','Bounded QP','VTDA-L2','ACTA','X-ACTA'};
-    functions = {@wt4_2024_minmax_v4,@wt_pott_v2,@wt_qp_bounded_v11, ...
-        @wt_gouttefarde_v2,@wt_acta,@wt_xacta};
+    functions = {@wt_direct,@wt_pott,@wt_qp_bounded, ...
+        @wt_gouttefarde,@wt_acta,@wt_xacta};
 end
 result = struct('position_mm',position,'anchors_mm',parameters.param.M, ...
     'requested_force_N',requested_force,'wec_target_N',target_force, ...

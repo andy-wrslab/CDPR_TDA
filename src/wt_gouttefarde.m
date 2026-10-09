@@ -1,6 +1,6 @@
-function WDM=wt_gouttefarde_v2(WDM,P,F)
-% WT_GOUTTEFARDE_V2 Vertex-based cable-tension distribution (VTDA-L2).
-%   OUT = wt_gouttefarde_v2(WDM,P,F) constructs numerical null coordinates,
+function WDM=wt_gouttefarde(WDM,P,F)
+% WT_GOUTTEFARDE Vertex-based cable-tension distribution (VTDA-L2).
+%   OUT = wt_gouttefarde(WDM,P,F) constructs numerical null coordinates,
 %   traces the feasible polygon, and tests vertex/edge L2 candidates. It may
 %   fall back to the minimum-norm feasible vertex that it traced.
 %

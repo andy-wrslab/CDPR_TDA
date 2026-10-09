@@ -45,7 +45,7 @@ Where to look
   examples/    The small example above, including independent physical checks.
   docs/        Function contracts, method references and test summary.
   benchmark/   Capture/reproduction entry points, settings and cost information.
-  provenance/  Original/published source identities and executable-line checks.
+  provenance/  Original/published source identities and function-name mapping.
   CHANGES.txt  Presentation changes and new setup/validation wrappers.
   NOTICES.txt  Source attribution and license information.
 
@@ -85,8 +85,9 @@ raw data and generated results are intentionally not included in this ZIP.
 
 Validation and preservation
 
-The published numerical functions differ from the measured sources only in
-full-line comments and blank lines. Their executable lines, solver settings
-and timing boundaries are preserved. New wrappers handle paths, fresh output
+The numerical statements are preserved after the documented function-name
+mapping; public function names have no revision suffixes. Documentation and
+benchmark log/default-directory names have also been updated. Solver settings
+and timing boundaries are unchanged. New wrappers handle paths, fresh output
 directories and validation outside the measured routines. See CHANGES.txt and
 docs/VALIDATION.txt for the tested commands and the full-run testing limit.

@@ -1,6 +1,6 @@
-function report=analyze_interior_infeasible_v11(folder)
-%ANALYZE_INTERIOR_INFEASIBLE_V11 Paired accuracy within the spatial interior.
-% Read completed v11 observations only; no solver or timer is called. Keep
+function report=analyze_interior_infeasible(folder)
+%ANALYZE_INTERIOR_INFEASIBLE Paired accuracy within the spatial interior.
+% Read completed saved observations only; no solver or timer is called. Keep
 % both-successful and each one-sided failure denominator explicit. Quantiles
 % use identical original rows for X-ACTA and WEC+DM. Write a separate CSV/MAT
 % without altering capture, summary, or previously generated result tables.

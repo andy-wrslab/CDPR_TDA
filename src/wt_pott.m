@@ -1,6 +1,6 @@
-function WDM=wt_pott_v2(WDM,P,F)
-% WT_POTT_V2 Improved closed-form cable-tension distribution (ICFM).
-%   OUT = wt_pott_v2(WDM,P,F) starts at the midpoint tension vector, projects
+function WDM=wt_pott(WDM,P,F)
+% WT_POTT Improved closed-form cable-tension distribution (ICFM).
+%   OUT = wt_pott(WDM,P,F) starts at the midpoint tension vector, projects
 %   with MATLAB pinv, and clamps/removes violating cables in up to three
 %   nested steps. Lower-bound violations are tested before upper violations.
 %   This is not a quadprog call and is not an L2-optimality certificate.

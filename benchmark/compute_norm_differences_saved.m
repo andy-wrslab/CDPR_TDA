@@ -1,6 +1,6 @@
-function result = compute_norm_differences_saved_v11(inputDir,outputDir,inventoryFile)
-%COMPUTE_NORM_DIFFERENCES_SAVED_V11 Actual-tension L2 differences from saved T.
-%   RESULT = COMPUTE_NORM_DIFFERENCES_SAVED_V11(INPUT,OUTPUT,INVENTORY)
+function result = compute_norm_differences_saved(inputDir,outputDir,inventoryFile)
+%COMPUTE_NORM_DIFFERENCES_SAVED Actual-tension L2 differences from saved T.
+%   RESULT = COMPUTE_NORM_DIFFERENCES_SAVED(INPUT,OUTPUT,INVENTORY)
 %   computes ||T_method||_2 - ||T_DM||_2 in N for ICFM, bounded QP and VTDA-L2.
 %   No solver is called, no timing is measured/replaced, and INPUT is read-only.
 %   INPUT is the completed review_v11_full directory. INVENTORY defaults to
@@ -65,7 +65,7 @@ try
 
     sourceFile=[mfilename('fullpath') '.m'];sourceHash=hash_file(sourceFile);
     sourceDir=fullfile(outputDir,'norm_difference_source');mkdir(sourceDir);
-    copyfile(sourceFile,fullfile(sourceDir,'compute_norm_differences_saved_v11.m'));
+    copyfile(sourceFile,fullfile(sourceDir,'compute_norm_differences_saved.m'));
     guardDir=fullfile(outputDir,'norm_solver_guards');mkdir(guardDir);
     for k=1:numel(manifest.solver_functions)
         fn=manifest.solver_functions{k};fid=fopen(fullfile(guardDir,[fn '.m']),'w');assert(fid~=-1);
@@ -223,7 +223,7 @@ try
     assert(all(after.passed)&&isequal(before.observed_sha256,after.observed_sha256));
     assert(strcmp(receipt.inventory_sha256,hash_file(inventoryFile)));
     assert(strcmp(sourceHash,hash_file(sourceFile))&&strcmp(sourceHash, ...
-        hash_file(fullfile(sourceDir,'compute_norm_differences_saved_v11.m'))));
+        hash_file(fullfile(sourceDir,'compute_norm_differences_saved.m'))));
     write_notes(outputDir,statistics,geometry_difference);
     receipt.status='passed';receipt.finished_at=datestr(now,30);
     receipt.original_inputs_unchanged=true;receipt.input_files_checked=height(before);
